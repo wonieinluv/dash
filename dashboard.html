@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NADITOWN | Adaptive Township Emergency Operating System - Sime Darby Property</title>
+  
+  <!-- Leaflet CSS & JS CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    /* =========================================================
+       THEME PALETTE: SIME DARBY GREEN, CRISP WHITE & TIMBER BROWN
+       ========================================================= */
+    :root {
+      /* Base & Surfaces (Deep Forest Dark) */
+      --bg: #ecf5ee;                    /* Deep dark forest slate */
+      --card-bg: #523e2c;               /* Forest dark card surface */
+      --card-hover: #413a22;            /* Forest green card hover */
+      --card-inner: #4a3c26;            /* Sub-container surface */
+      --border: #283e2f;                /* Forest green subtle border */
+      --border-light: #385542;          /* Lighter green border */
+
+      /* Sime Darby Forest Green Accents */
+      --green-dark: #0f3d24;            /* Deep corporate green */
+      --green-primary: #15803d;         /* Forest green primary */
+      --green-bright: #22c55e;          /* Nature vibrant green */
+      --green-emerald: #10b981;         /* Emerald safe route green */
+      --green-glow: rgba(34, 197, 94, 0.22);
+      --green-pill-bg: rgba(21, 128, 61, 0.18);
+
+      /* Earth / Wood / Brown Accents */
+      --brown-deep: #19120c;            /* Deep dark timber */
+      --brown-surface: #241a12;         /* Earth brown card interior */
+      --brown-border: #4a3625;          /* Timber wood border */
+      --brown-border-light: #6a4f37;    /* Lighter timber border */
+      --brown-primary: #a16207;         /* Warm cognac / bronze brown */
+      --brown-amber: #b45309;           /* Earth amber-brown */
+      --brown-glow: rgba(161, 98, 7, 0.22);
+      --brown-pill-bg: rgba(180, 83, 9, 0.18);
+
+      /* Crisp White & Ivory Typography */
+      --text-white: #ffffff;            /* Pure crisp white */
+      --text-ivory: #f8faf5;            /* Off-white headings & numbers */
+      --text-cream: #faedd9;            /* Warm cream accent text */
+      --text-muted: #9fb39c;            /* Sage muted green-gray */
+      --text-dim: #70846e;              /* Subtle sage text */
+      --text-brown: #d7bfa8;            /* Warm sand/tan text */
+
+      /* Emergency Hazard Accents */
+      --accent-red: #ef4444;            /* Critical breach red */
+      --accent-red-glow: rgba(239, 68, 68, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text-ivory);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      padding: 12px;
+      gap: 12px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0c150f; }
+    ::-webkit-scrollbar-thumb { background: #283e2f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3c5d46; }
+
+    /* Top Navigation Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+    }
+    .brand-section { display: flex; align-items: center; gap: 12px; }
+    .brand-badge {
+      background: linear-gradient(135deg, #166534, #15803d);
+      color: var(--text-white);
+      border: 1px solid var(--brown-primary);
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 14px var(--green-glow);
+    }
+    .brand-title { font-size: 14px; font-weight: 800; color: var(--text-white); }
+    .brand-sub { font-size: 11px; color: var(--text-brown); }
+
+    .status-group { display: flex; align-items: center; gap: 12px; }
+    .emergency-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brown-pill-bg);
+      color: #fde68a;
+      border: 1px solid var(--brown-primary);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .emergency-pill .pulsing-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+      animation: pulse 1.5s infinite;
+    }
+    .opr-pill {
+      font-size: 12px;
+      color: var(--text-brown);
+      background: var(--brown-surface);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--brown-border);
+    }
+    .clock-display { font-size: 13px; font-weight: 700; font-family: monospace; color: var(--text-white); }
+
+    /* KPI Summary Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-accent, var(--green-primary));
+    }
+    .kpi-card:hover { border-color: var(--border-light); transform: translateY(-1px); }
+    .kpi-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .kpi-label { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-muted); }
+    .kpi-badge { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+    .kpi-value-row { display: flex; align-items: baseline; gap: 8px; margin: 4px 0; }
+    .kpi-value { font-size: 22px; font-weight: 800; color: var(--text-white); }
+    .kpi-unit { font-size: 12px; color: var(--text-brown); font-weight: 500; }
+    
+    .kpi-subtext { font-size: 11px; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; }
+    .mini-progress-track { height: 4px; background: #1a2a1f; border-radius: 2px; overflow: hidden; margin-top: 6px; }
+    .mini-progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+
+    .kpi-resources-strip { display: flex; gap: 8px; font-size: 10px; color: var(--text-brown); margin-top: 4px; }
+    .resource-badge { background: var(--brown-surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--brown-border); }
+
+    /* Main Dashboard Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Left Column: Map & Simulation Sandbox */
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    /* Map View Container */
+    .map-container {
+      flex: 1;
+      background: #08100a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 380px;
+    }
+    #map-viewport { width: 100%; height: 100%; z-index: 1; }
+
+    /* Map Floating Controls & Route Banner */
+    .map-floating-route-banner {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 10;
+      background: rgba(14, 28, 19, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid #2d5237;
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.55);
+    }
+    .route-banner-info { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .route-status-tag {
+      background: var(--green-pill-bg);
+      color: var(--green-bright);
+      border: 1px solid var(--green-primary);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .map-floating-actions {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .map-legend-box {
+      background: rgba(28, 21, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--brown-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text-brown);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-line { width: 18px; height: 3px; border-radius: 2px; }
+
+    .map-layer-toggles {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 10;
+      background: rgba(28, 21, 15, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--brown-border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .layer-btn {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      color: var(--text-brown);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .layer-btn.active {
+      background: var(--green-primary);
+      color: var(--text-white);
+      border-color: var(--green-bright);
+      box-shadow: 0 0 10px var(--green-glow);
+    }
+
+    /* Simulation Control Sandbox */
+    .sim-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sim-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--green-bright);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .preset-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      color: var(--text-brown);
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-btn:hover { background: #332419; color: var(--text-white); }
+    .preset-btn.active {
+      background: var(--green-dark);
+      border-color: var(--green-bright);
+      color: var(--text-white);
+      font-weight: 700;
+    }
+
+    .slider-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+    .slider-block {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+    .slider-label { color: var(--text-brown); font-weight: 600; }
+    .slider-val { font-weight: 700; color: var(--text-white); }
+
+    /* Validated Range Slider in Green, White & Brown */
+    input[type=range] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 5px;
+      background: #3a2b1e;
+      border-radius: 3px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--green-bright);
+      cursor: pointer;
+      border: 2px solid var(--text-white);
+      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--green-bright);
+      cursor: pointer;
+      border: 2px solid var(--text-white);
+      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+    }
+
+    /* Right Column: Tactical Action & Verification Center */
+    .right-column {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* Navigation Tabs */
+    .tab-nav {
+      display: flex;
+      background: #0f1712;
+      border-bottom: 1px solid var(--border);
+      padding: 4px 6px;
+      gap: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .tab-btn:hover { color: var(--text-white); background: rgba(255,255,255,0.04); }
+    .tab-btn.active {
+      background: #18281d;
+      color: var(--text-white);
+      border: 1px solid #2d4834;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .tab-badge {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      color: var(--text-brown);
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .tab-btn.active .tab-badge {
+      background: var(--green-primary);
+      border-color: var(--green-bright);
+      color: var(--text-white);
+    }
+
+    /* Tab Content Panels */
+    .tab-contents {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tab-pane { display: none; flex-direction: column; gap: 10px; }
+    .tab-pane.active { display: flex; }
+
+    /* Decision Support Cards */
+    .decision-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--green-primary);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .decision-card.severity-critical { border-left-color: var(--accent-red); background: linear-gradient(90deg, rgba(239,68,68,0.06), #17241b 30%); }
+    .decision-card.severity-high { border-left-color: var(--brown-amber); background: linear-gradient(90deg, rgba(180,83,9,0.08), #17241b 30%); }
+    .decision-card.severity-medium { border-left-color: var(--green-primary); }
+    .decision-card.status-approved { opacity: 0.65; border-left-color: var(--green-bright); }
+
+    .dec-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .dec-title { font-size: 13px; font-weight: 700; color: var(--text-white); }
+    .dec-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .badge-critical { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid var(--accent-red); }
+    .badge-high { background: rgba(180,83,9,0.2); color: #fde68a; border: 1px solid var(--brown-amber); }
+    .badge-medium { background: var(--green-pill-bg); color: #86efac; border: 1px solid var(--green-primary); }
+    .badge-approved { background: rgba(34,197,94,0.2); color: #86efac; border: 1px solid var(--green-bright); }
+
+    .dec-desc { font-size: 12px; color: #d6e2d4; line-height: 1.4; }
+    .dec-impact { font-size: 11px; color: var(--text-cream); font-weight: 600; }
+    
+    .dec-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-action {
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+    .btn-approve { background: var(--green-primary); color: var(--text-white); }
+    .btn-approve:hover { background: #166534; }
+    .btn-map-view { background: var(--brown-surface); color: var(--text-cream); border: 1px solid var(--brown-border); }
+    .btn-map-view:hover { background: #38281a; color: var(--text-white); }
+    .btn-dismiss { background: #201812; color: var(--text-brown); }
+    .btn-dismiss:hover { background: #30241b; color: var(--text-white); }
+
+    /* Outstanding Requests Cards */
+    .request-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .req-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .req-id { font-size: 12px; font-weight: 800; color: var(--green-bright); }
+    .req-urgency { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .req-requester { font-size: 13px; font-weight: 700; color: var(--text-white); }
+    .req-location { font-size: 11px; color: var(--text-brown); }
+    .req-need { font-size: 12px; color: var(--text-white); background: var(--brown-surface); padding: 6px 10px; border-radius: 5px; border-left: 3px solid var(--brown-amber); }
+    
+    .req-match-box {
+      font-size: 11px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .match-pending { background: rgba(180, 83, 9, 0.15); color: #fde68a; border: 1px dashed var(--brown-amber); }
+    .match-assigned { background: var(--green-pill-bg); color: #86efac; border: 1px solid var(--green-primary); }
+    .match-dispatched { background: rgba(161, 98, 7, 0.2); color: var(--text-white); border: 1px solid var(--brown-primary); }
+
+    /* Verification & Audit Center */
+    .vrf-summary-box {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .vrf-stat { display: flex; flex-direction: column; }
+    .vrf-stat-label { font-size: 10px; text-transform: uppercase; color: var(--text-brown); font-weight: 700; }
+    .vrf-stat-value { font-size: 16px; font-weight: 800; color: var(--text-white); }
+
+    .audit-filter-row { display: flex; gap: 6px; margin-bottom: 4px; }
+    .audit-filter-btn {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      color: var(--text-brown);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .audit-filter-btn.active { background: var(--green-primary); color: var(--text-white); border-color: var(--green-bright); }
+
+    .audit-log-stream { display: flex; flex-direction: column; gap: 6px; max-height: 380px; overflow-y: auto; }
+    .audit-entry {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .audit-entry-top { display: flex; justify-content: space-between; align-items: center; }
+    .audit-time { font-family: monospace; color: var(--text-muted); font-size: 10px; }
+    .audit-cat { font-weight: 700; font-size: 9px; padding: 1px 5px; border-radius: 3px; }
+    .cat-TELEMETRY { background: #1b2e1f; color: #86efac; }
+    .cat-ROAD_STATUS { background: #3b1111; color: #f87171; }
+    .cat-SIMULATION { background: #382414; color: #fde68a; }
+    .cat-REROUTE { background: #0f3d24; color: #4ade80; }
+    .cat-APPROVAL { background: #2f2113; color: #fcd34d; }
+    .cat-RESOURCE_MATCH { background: #163824; color: #6ee7b7; }
+    .cat-DISPATCH { background: #3a2211; color: #fed7aa; }
+
+    .audit-hash { font-family: monospace; font-size: 9px; color: var(--text-dim); }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #18281d;
+      border: 1px solid var(--border-light);
+      border-left: 4px solid var(--green-bright);
+      color: var(--text-white);
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+      animation: slideIn 0.3s ease-out;
+      pointer-events: auto;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--brown-border-light);
+      border-radius: 10px;
+      width: 90%;
+      max-width: 480px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 14px; font-weight: 700; color: var(--text-white); }
+    .modal-close { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-label { font-size: 11px; color: var(--text-brown); font-weight: 600; text-transform: uppercase; }
+    .form-input, .form-select {
+      background: var(--brown-surface);
+      border: 1px solid var(--brown-border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: var(--text-white);
+      font-size: 12px;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--green-bright); }
+
+    /* Animations */
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } }
+    @keyframes pulseGlow { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 0.3; } }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* Leaflet Overrides */
+    .leaflet-container { background: #08100a !important; }
+    .leaflet-popup-content-wrapper { background: #162219 !important; border: 1px solid #36503c !important; border-radius: 8px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.7) !important; }
+    .leaflet-popup-tip { background: #162219 !important; }
+    .animated-route-flow { animation: routeDash 1s linear infinite; }
+    @keyframes routeDash { to { stroke-dashoffset: -20; } }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-bar">
+    <div class="brand-section">
+      <div class="brand-badge">NADITOWN</div>
+      <div>
+        <div class="brand-title">Adaptive Township Emergency Operating System</div>
+        <div class="brand-sub">Sime Darby Property &bull; Bandar Elmina (City of Elmina), Shah Alam</div>
+      </div>
+    </div>
+
+    <div class="status-group">
+      <div class="emergency-pill" id="emergency-pill">
+        <span class="pulsing-dot"></span>
+        <span id="emergency-level-text">LEVEL 3: ORANGE ALERT</span>
+      </div>
+      <div class="opr-pill">
+        <span>Bilik Gerakan PKOB: <strong>OPR-8841</strong></span>
+      </div>
+      <div class="clock-display" id="live-clock">10:14:02 UTC+8</div>
+    </div>
+  </header>
+
+  <!-- 2. KPI Summary Cards Grid -->
+  <section class="kpi-grid">
+    <!-- Card 1: Road Segments -->
+    <div class="kpi-card" style="--card-accent: var(--green-primary);">
+      <div class="kpi-header">
+        <span class="kpi-label">Rangkaian Jalan Raya</span>
+        <span class="kpi-badge" id="kpi-road-badge" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid var(--accent-red);">1 Terputus</span>
+      </div>
+      <div class="kpi-value-row">
+        <span class="kpi-value" id="kpi-open-roads">4</span>
+        <span class="kpi-unit">/ 6 Segmen Dibuka</span>
+      </div>
+      <div class="kpi-subtext">
+        <span id="kpi-road-subtext">4 Selamat &bull; 1 Amaran &bull; 1 Ditutup</span>
+        <span id="kpi-road-pct">67% Passable</span>
+      </div>
+      <div class="mini-progress-track">
+        <div class="mini-progress-fill" id="kpi-road-bar" style="width: 67%; background: var(--green-bright);"></div>
+      </div>
+    </div>
+
+    <!-- Card 2: Shelter Capacity & Resources -->
+    <div class="kpi-card" style="--card-accent: var(--green-bright);">
+      <div class="kpi-header">
+        <span class="kpi-label">Kapasiti PPS &amp; Sumber</span>
+        <span class="kpi-badge" style="background: var(--green-pill-bg); color: var(--green-bright); border: 1px solid var(--green-primary);" id="kpi-shelter-active">2 PPS Aktif</span>
+      </div>
+      <div class="kpi-value-row">
+        <span class="kpi-value" id="kpi-shelter-pct">46.3%</span>
+        <span class="kpi-unit" id="kpi-shelter-counts">(648 / 1,400 Mangsa)</span>
+      </div>
+      <div class="kpi-resources-strip">
+        <span class="resource-badge" id="badge-food">🍱 MRE: 2,350</span>
+        <span class="resource-badge" id="badge-boats">🚤 Bot: 3 Sedia</span>
+        <span class="resource-badge" id="badge-4x4">🚙 4x4: 5 Sedia</span>
+      </div>
+      <div class="mini-progress-track">
+        <div class="mini-progress-fill" id="kpi-shelter-bar" style="width: 46%; background: var(--green-primary);"></div>
+      </div>
+    </div>
+
+    <!-- Card 3: Emergency Requests Pipeline -->
+    <div class="kpi-card" style="--card-accent: var(--brown-primary);">
+      <div class="kpi-header">
+        <span class="kpi-label">Permintaan Mangsa</span>
+        <span class="kpi-badge" style="background: var(--brown-pill-bg); color: #fde68a; border: 1px solid var(--brown-amber);" id="kpi-req-badge">2 Menunggu</span>
+      </div>
+      <div class="kpi-value-row">
+        <span class="kpi-value" id="kpi-total-requests">6</span>
+        <span class="kpi-unit">Jumlah Permintaan</span>
+      </div>
+      <div class="kpi-subtext">
+        <span id="kpi-requests-breakdown">2 Menunggu &bull; 2 Dipadan &bull; 2 Dikerah</span>
+        <span id="kpi-match-rate">66.7% Matched</span>
+      </div>
+      <div class="mini-progress-track">
+        <div class="mini-progress-fill" id="kpi-requests-bar" style="width: 67%; background: var(--brown-primary);"></div>
+      </div>
+    </div>
+
+    <!-- Card 4: Routing & Verification Engine -->
+    <div class="kpi-card" style="--card-accent: var(--green-emerald);">
+      <div class="kpi-header">
+        <span class="kpi-label">Pengiraan Laluan &amp; Verifikasi</span>
+        <span class="kpi-badge" style="background: var(--green-pill-bg); color: var(--green-emerald); border: 1px solid var(--green-primary);">A* Dijkstra</span>
+      </div>
+      <div class="kpi-value-row">
+        <span class="kpi-value" id="kpi-recalc-time">8.4</span>
+        <span class="kpi-unit">ms Penilaian Graf</span>
+      </div>
+      <div class="kpi-subtext">
+        <span id="kpi-route-hazard-count">1 Bahaya Dilencongkan</span>
+        <span style="color: var(--green-bright);" id="kpi-verified-count">4 Triggers Disahkan</span>
+      </div>
+      <div class="mini-progress-track">
+        <div class="mini-progress-fill" style="width: 95%; background: var(--green-emerald);"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Dashboard Layout -->
+  <main class="main-layout">
+    
+    <!-- Left Column: Map View + Simulation Sandbox -->
+    <div class="left-column">
+      
+      <!-- 1. Map View Container -->
+      <div class="map-container">
+        
+        <!-- Live Route Status Overlay -->
+        <div class="map-floating-route-banner" id="map-route-banner">
+          <div class="route-banner-info">
+            <span class="route-status-tag" id="banner-route-tag">LALUAN LENCONGAN AKTIF</span>
+            <span id="banner-route-text" style="color: #fff; font-weight: 600;">
+              Sektor 4 &rarr; Dewan Komuniti Elmina West via Koridor Guthrie (Mengelak Sg. Buloh)
+            </span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:11px; color: var(--text-cream); font-family:monospace;" id="banner-recalc-stat">Masa: 8.4 ms | 3.65 km</span>
+          </div>
+        </div>
+
+        <!-- The Leaflet Map Viewport -->
+        <div id="map-viewport"></div>
+
+        <!-- Floating Map Legend -->
+        <div class="map-floating-actions">
+          <div class="map-legend-box">
+            <div class="legend-item"><div class="legend-line" style="background: var(--green-bright);"></div><span>Laluan Dibuka (Selamat)</span></div>
+            <div class="legend-item"><div class="legend-line" style="background: var(--brown-amber);"></div><span>Amaran Air Bertatang (4x4 Sahaja)</span></div>
+            <div class="legend-item"><div class="legend-line" style="background: #ef4444; border-top: 2px dashed #fff;"></div><span>Laluan Ditutup (Banjir)</span></div>
+            <div class="legend-item"><div class="legend-line" style="background: var(--green-emerald); border-top: 2px dashed #fff;"></div><span>Laluan Dijkstra Dijadual Semula</span></div>
+            <div class="legend-item"><span style="color: var(--green-bright);">●</span><span>PPS &amp; Hospital Rujukan</span></div>
+            <div class="legend-item"><span style="color: var(--brown-primary);">●</span><span>Sensor Telemetri IoT</span></div>
+          </div>
+        </div>
+
+        <!-- Floating Layer Toggles & Map Style Switcher -->
+        <div class="map-layer-toggles">
+          <button class="layer-btn active" id="layer-btn-floodZones">Zon Banjir</button>
+          <button class="layer-btn active" id="layer-btn-roads">Jalanraya</button>
+          <button class="layer-btn active" id="layer-btn-pps">PPS &amp; Kesihatan</button>
+          <button class="layer-btn active" id="layer-btn-sensors">Sensor IoT</button>
+          <button class="layer-btn active" id="layer-btn-route">Laluan Dijkstra</button>
+          <span style="color: var(--brown-border-light);">|</span>
+          <button class="layer-btn" id="map-style-toggle" title="Tukar Gaya Peta">🗺️ Dark</button>
+          <button class="layer-btn" id="map-reset-btn" title="Set Semula Paparan Peta">🔄 Reset</button>
+        </div>
+      </div>
+
+      <!-- 3. Flood & Road Closure Scenarios (Sliders for Operators) -->
+      <div class="sim-panel">
+        <div class="sim-header">
+          <div class="sim-title">
+            <span>⚙️ Panel Ujian Simulasi &amp; Senario Banjir (Pengendali)</span>
+          </div>
+          <div class="preset-group">
+            <button class="preset-btn" data-preset="normal">☀️ 1. Normal</button>
+            <button class="preset-btn active" data-preset="sector2_flood">🌧️ 2. Sektor 2 Banjir Kilat</button>
+            <button class="preset-btn" data-preset="monsoon_deluge">⛈️ 3. Limpahan Monsun</button>
+            <button class="preset-btn" data-preset="max_evacuation">🚨 4. Evakuasi Maksimum</button>
+          </div>
+        </div>
+
+        <!-- Interactive Sliders -->
+        <div class="slider-grid">
+          <!-- Slider 1: Rainfall -->
+          <div class="slider-block">
+            <div class="slider-label-row">
+              <span class="slider-label">🌧️ Keamatan Hujan</span>
+              <span class="slider-val" id="val-rainfall">68 mm/j (Lebat)</span>
+            </div>
+            <input type="range" id="slider-rainfall" min="0" max="150" step="5" value="68" />
+          </div>
+
+          <!-- Slider 2: River & Retention Pond Surge -->
+          <div class="slider-block">
+            <div class="slider-label-row">
+              <span class="slider-label">🌊 Peningkatan Aras Air</span>
+              <span class="slider-val" id="val-surge">+0.95 m (Limpahan)</span>
+            </div>
+            <input type="range" id="slider-surge" min="0.0" max="2.5" step="0.05" value="0.95" />
+          </div>
+
+          <!-- Slider 3: Flood Risk Multiplier -->
+          <div class="slider-block">
+            <div class="slider-label-row">
+              <span class="slider-label">⚠️ Pengganda Sensitiviti Risiko</span>
+              <span class="slider-val" id="val-risk">1.4x (Tinggi)</span>
+            </div>
+            <input type="range" id="slider-risk" min="1.0" max="2.5" step="0.1" value="1.4" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Decision Support, Outstanding Requests & Verification Center -->
+    <div class="right-column">
+      
+      <!-- Top Navigation Tabs -->
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="tab-decisions">
+          <span>🧠 Sokongan Keputusan</span>
+          <span class="tab-badge" id="badge-decisions-count">3</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-requests">
+          <span>📋 Permintaan Tertunggak</span>
+          <span class="tab-badge" id="badge-requests-count">2</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-verification">
+          <span>🛡️ Verifikasi &amp; Audit</span>
+          <span class="tab-badge" id="badge-logs-count">4</span>
+        </button>
+      </nav>
+
+      <!-- Tab Contents Area -->
+      <div class="tab-contents">
+        
+        <!-- 4. Tab 1: Decision Support (Suggestions & Action Buttons) -->
+        <div class="tab-pane active" id="tab-decisions">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">
+              Cadangan Operasi Automatik (Menunggu Pengesahan Pengendali)
+            </span>
+            <button class="btn-action btn-approve" id="btn-approve-all" style="padding:4px 8px; font-size:10px;">
+              ⚡ Luluskan Semua Kritikal
+            </button>
+          </div>
+
+          <div id="decisions-list-container" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+
+        <!-- 5. Tab 2: Outstanding Requests (List of pending requests matching resources) -->
+        <div class="tab-pane" id="tab-requests">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:6px;" id="request-filter-group">
+              <button class="audit-filter-btn active" data-req-filter="all">Semua (<span id="count-req-all">6</span>)</button>
+              <button class="audit-filter-btn" data-req-filter="pending">Menunggu (<span id="count-req-pending">2</span>)</button>
+              <button class="audit-filter-btn" data-req-filter="matched">Dipadankan (<span id="count-req-matched">2</span>)</button>
+              <button class="audit-filter-btn" data-req-filter="dispatched">Dikerahkan (<span id="count-req-dispatched">2</span>)</button>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-action btn-approve" id="btn-auto-match-all" style="padding:4px 8px; font-size:10px;">
+                ⚡ Padan Automatik
+              </button>
+              <button class="btn-action btn-map-view" id="btn-new-request-modal" style="padding:4px 8px; font-size:10px;">
+                + Tambah
+              </button>
+            </div>
+          </div>
+
+          <div id="requests-list-container" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+
+        <!-- 6. Tab 3: Verification (Updated Info, Log of Triggers, Route Recalculation Time, Operator Approvals) -->
+        <div class="tab-pane" id="tab-verification">
+          
+          <!-- Verification Stat Badges -->
+          <div class="vrf-summary-box">
+            <div class="vrf-stat">
+              <span class="vrf-stat-label">Masa Pengiraan Laluan</span>
+              <span class="vrf-stat-value" id="vrf-calc-time" style="color: var(--green-bright);">8.4 ms (A* Dijkstra)</span>
+            </div>
+            <div class="vrf-stat">
+              <span class="vrf-stat-label">Kadar Sumber Dipadankan</span>
+              <span class="vrf-stat-value" id="vrf-match-ratio" style="color: var(--text-cream);">4 / 6 Permintaan (67%)</span>
+            </div>
+            <div class="vrf-stat">
+              <span class="vrf-stat-label">Pengesahan Pengendali</span>
+              <span class="vrf-stat-value" id="vrf-approvals-count" style="color: var(--green-emerald);">2 Diluluskan</span>
+            </div>
+            <div class="vrf-stat">
+              <span class="vrf-stat-label">Audit Digital Hash</span>
+              <span class="vrf-stat-value" id="vrf-hash-val" style="font-family: monospace; font-size:13px; color:var(--text-brown);">VRF-SEC78A4</span>
+            </div>
+          </div>
+
+          <!-- Filter & Action Bar for Logs -->
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="audit-filter-row" id="audit-filter-group">
+              <button class="audit-filter-btn active" data-log-filter="ALL">Semua Log</button>
+              <button class="audit-filter-btn" data-log-filter="TELEMETRY">Sensor</button>
+              <button class="audit-filter-btn" data-log-filter="REROUTE">Laluan</button>
+              <button class="audit-filter-btn" data-log-filter="APPROVAL">Pengesahan</button>
+              <button class="audit-filter-btn" data-log-filter="DISPATCH">Kerahan</button>
+            </div>
+            <button class="btn-action btn-map-view" id="btn-export-audit" style="padding:4px 8px; font-size:10px;">
+              📥 Eksport Audit (JSON)
+            </button>
+          </div>
+
+          <!-- Log Stream -->
+          <div class="audit-log-stream" id="audit-log-stream">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal: Tambah Permintaan Kecemasan Baharu -->
+  <div class="modal-backdrop" id="modal-new-request">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Rekod Permintaan Bantuan Kecemasan</h3>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Pemohon / Mangsa</label>
+        <input type="text" class="form-input" id="modal-inp-name" placeholder="cth: Pn. Halimah & Keluarga (4 orang)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lokasi / Alamat Bandar Elmina</label>
+        <input type="text" class="form-input" id="modal-inp-location" placeholder="cth: No 15, Jalan Elmina Green 3" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jenis Keperluan</label>
+        <input type="text" class="form-input" id="modal-inp-need" placeholder="cth: Pemindahan Kerusi Roda / Makanan Bayi" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tahap Kecemasan</label>
+        <select class="form-select" id="modal-inp-urgency">
+          <option value="critical">Kritikal (Zon Limpahan / Nyawa Terancam)</option>
+          <option value="high" selected>Tinggi (Kanak-kanak / Perubatan)</option>
+          <option value="medium">Sederhana (Bekalan Makanan / Khemah)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sumber Diperlukan</label>
+        <select class="form-select" id="modal-inp-resource">
+          <option value="Pacuan 4x4 / Ambulans">Pacuan 4x4 / Ambulans</option>
+          <option value="Bot Penyelamat JBPM">Bot Penyelamat JBPM</option>
+          <option value="Lori Logistik 5-Tan">Lori Logistik 5-Tan (Pek Makanan)</option>
+          <option value="Generator Mudah Alih 25kVA">Generator Mudah Alih 25kVA</option>
+        </select>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+        <button class="btn-action btn-dismiss" id="modal-cancel-btn">Batal</button>
+        <button class="btn-action btn-approve" id="modal-submit-btn">Daftar &amp; Hantar ke Barisan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Self-contained, robust script bundle that guarantees execution both under file:// protocol and web servers -->
+  <script>
+    (function() {
+      // 1. DATASETS
+      const TOWNSHIP_META = {
+        name: "Bandar Elmina (City of Elmina)",
+        developer: "Sime Darby Property",
+        district: "Shah Alam, Selangor",
+        coordinates: [3.1835, 101.5080],
+        zoom: 14,
+        bounds: [[3.1600, 101.4850], [3.2100, 101.5350]]
+      };
+
+      const FACILITIES = [
+        {
+          id: "pps-01",
+          name: "Dewan Komuniti Elmina West",
+          type: "pps",
+          category: "Pusat Pemindahan Sementara (PPS)",
+          coordinates: [3.1855, 101.5042],
+          capacity: 450,
+          currentOccupants: 168,
+          status: "active",
+          amenities: ["Bekalan Makanan", "Bilik Rawatan", "Genset Elektrik", "WiFi Satelit"],
+          contact: "019-3214589 (En. Rashid - JKM)",
+          lastUpdated: "10 minit lalu"
+        },
+        {
+          id: "pps-02",
+          name: "SK Subang Bestari (Dewan Utama)",
+          type: "pps",
+          category: "Pusat Pemindahan Sementara (PPS)",
+          coordinates: [3.1780, 101.5280],
+          capacity: 600,
+          currentOccupants: 480,
+          status: "warning",
+          amenities: ["Dapur Rakyat", "Ruang Bersalin Kecemasan", "Sistem PA"],
+          contact: "012-9876543 (Pn. Salmah - Guru Besar)",
+          lastUpdated: "5 minit lalu"
+        },
+        {
+          id: "pps-03",
+          name: "Kompleks Sukan Denai Alam",
+          type: "pps",
+          category: "Pusat Pemindahan Sementara (PPS)",
+          coordinates: [3.1620, 101.5150],
+          capacity: 350,
+          currentOccupants: 0,
+          status: "standby",
+          amenities: ["Padang Helipad Sementara", "Tangki Air Bersih 50,000L"],
+          contact: "013-4455667 (Kapten Faris - RELA)",
+          lastUpdated: "15 minit lalu"
+        },
+        {
+          id: "med-01",
+          name: "Klinik Kesihatan Denai Alam & Pusat Triage",
+          type: "medical",
+          category: "Fasiliti Kesihatan",
+          coordinates: [3.1660, 101.5185],
+          capacity: 120,
+          currentOccupants: 42,
+          status: "active",
+          amenities: ["Ambulans 4x4", "Stok Antivenom & Tetanus", "Tabung Oksigen"],
+          contact: "03-78451122 (Dr. Azlan)",
+          lastUpdated: "2 minit lalu"
+        },
+        {
+          id: "med-02",
+          name: "Hospital Thomson / Subang Medical Forward Base",
+          type: "medical",
+          category: "Fasiliti Kesihatan Rujukan",
+          coordinates: [3.1950, 101.5240],
+          capacity: 80,
+          currentOccupants: 15,
+          status: "active",
+          amenities: ["Unit ICU Bergerak", "Bilik Bedah Kecemasan"],
+          contact: "03-61409999",
+          lastUpdated: "8 minit lalu"
+        },
+        {
+          id: "resp-01",
+          name: "Balai Bomba & Penyelamat (JBPM) Pos Elmina",
+          type: "responder",
+          category: "Pusat Tindak Balas Penyelamat",
+          coordinates: [3.1910, 101.5110],
+          capacity: 50,
+          currentOccupants: 38,
+          status: "active",
+          amenities: ["3x Bot Penyelamat", "2x Lori 5-Tan", "Peralatan Penyelamatan Air"],
+          contact: "03-78469994 (PBK II Shahril)",
+          lastUpdated: "1 minit lalu"
+        },
+        {
+          id: "resp-02",
+          name: "Pusat Kawalan Operasi Bencana (PKOB) Sime Darby",
+          type: "command",
+          category: "Pusat Kawalan Operasi",
+          coordinates: [3.1830, 101.5030],
+          capacity: 40,
+          currentOccupants: 22,
+          status: "active",
+          amenities: ["Drone Surveillance Command", "Radio Komunikasi Tetap", "CCTV Township AI"],
+          contact: "03-78498800 (Bilik Gerakan)",
+          lastUpdated: "Baru sahaja"
+        },
+        {
+          id: "log-01",
+          name: "Depot Logistik & Makanan Elmina East",
+          type: "logistics",
+          category: "Depot Bekalan Bencana",
+          coordinates: [3.1795, 101.5150],
+          capacity: 5000,
+          currentOccupants: 3400,
+          status: "active",
+          amenities: ["Makanan Sedia Dimakan (MRE)", "Selimut & Khemah Kanvas", "Generator 25kVA"],
+          contact: "017-6655443 (Pegawai NADMA)",
+          lastUpdated: "12 minit lalu"
+        }
+      ];
+
+      const SENSORS = [
+        {
+          id: "sensor-01",
+          name: "Sensor Kolam Takungan Elmina (Retention Pond West)",
+          coordinates: [3.1838, 101.5092],
+          waterLevel: 2.85,
+          dangerLevel: 3.20,
+          warningLevel: 2.50,
+          normalLevel: 1.50,
+          trend: "rising",
+          status: "warning",
+          battery: "94%",
+          lastReading: "2 minit lalu"
+        },
+        {
+          id: "sensor-02",
+          name: "Sensor Jambatan Sungai Buloh (Jalan Elmina 1)",
+          coordinates: [3.1755, 101.5020],
+          waterLevel: 3.42,
+          dangerLevel: 3.10,
+          warningLevel: 2.40,
+          normalLevel: 1.20,
+          trend: "rising",
+          status: "danger",
+          battery: "88%",
+          lastReading: "1 minit lalu"
+        },
+        {
+          id: "sensor-03",
+          name: "Sensor Alur Air Elmina Rainbow Bridge",
+          coordinates: [3.1882, 101.5078],
+          waterLevel: 1.95,
+          dangerLevel: 2.80,
+          warningLevel: 2.20,
+          normalLevel: 1.10,
+          trend: "steady",
+          status: "normal",
+          battery: "99%",
+          lastReading: "Just now"
+        },
+        {
+          id: "sensor-04",
+          name: "Sensor Parit Utama Denai Alam",
+          coordinates: [3.1645, 101.5125],
+          waterLevel: 2.65,
+          dangerLevel: 2.70,
+          warningLevel: 2.10,
+          normalLevel: 1.00,
+          trend: "rising",
+          status: "warning",
+          battery: "92%",
+          lastReading: "4 minit lalu"
+        }
+      ];
+
+      const ROAD_SEGMENTS = [
+        {
+          id: "road-01",
+          name: "Persiaran Elmina (Sektor Barat)",
+          status: "clear",
+          riskLevel: "Rendah",
+          coordinates: [[3.1810, 101.4980], [3.1835, 101.5030], [3.1855, 101.5080]],
+          surfaceWater: "0 cm",
+          passableFor: "Semua Kenderaan",
+          floodThreshold: 35
+        },
+        {
+          id: "road-02",
+          name: "Laluan Jambatan Sungai Buloh (Jalan Rentas Sektor 2)",
+          status: "closed",
+          riskLevel: "Bahaya",
+          coordinates: [[3.1730, 101.4990], [3.1755, 101.5020], [3.1775, 101.5065]],
+          surfaceWater: "65 cm (Arus Deras)",
+          passableFor: "Tidak Boleh Dilalui (Kecuali Bot)",
+          floodThreshold: 20
+        },
+        {
+          id: "road-03",
+          name: "Jalan Denai Alam Timur (Hubung ke SK Subang)",
+          status: "hazard",
+          riskLevel: "Sederhana",
+          coordinates: [[3.1660, 101.5120], [3.1695, 101.5180], [3.1740, 101.5240]],
+          surfaceWater: "20 cm",
+          passableFor: "Kenderaan Berat 4x4 Sahaja",
+          floodThreshold: 25
+        },
+        {
+          id: "road-04",
+          name: "Koridor Guthrie Interchange - Elmina East Bypass",
+          status: "clear",
+          riskLevel: "Rendah",
+          coordinates: [[3.1900, 101.5000], [3.1920, 101.5120], [3.1890, 101.5250]],
+          surfaceWater: "0 cm",
+          passableFor: "Semua Kenderaan (Laluan Evakuasi)",
+          floodThreshold: 60
+        },
+        {
+          id: "road-05",
+          name: "Laluan Lingkaran Tasik Elmina Central Park",
+          status: "hazard",
+          riskLevel: "Sederhana",
+          coordinates: [[3.1840, 101.5060], [3.1865, 101.5090], [3.1880, 101.5120]],
+          surfaceWater: "25 cm",
+          passableFor: "Kenderaan Penyelamat Sahaja",
+          floodThreshold: 25
+        },
+        {
+          id: "road-06",
+          name: "Persiaran Mokhtar Dahari Bypass Corridor",
+          status: "clear",
+          riskLevel: "Rendah",
+          coordinates: [[3.1700, 101.4900], [3.1650, 101.5050], [3.1620, 101.5150]],
+          surfaceWater: "0 cm",
+          passableFor: "Semua Kenderaan",
+          floodThreshold: 50
+        }
+      ];
+
+      const FLOOD_ZONES = [
+        {
+          id: "zone-red",
+          name: "Zon Limpahan Sungai Buloh (Sektor Bawah)",
+          severity: "danger",
+          level: "Zon Merah (Evakuasi Segera)",
+          depth: "0.6m - 1.2m",
+          color: "#ef4444",
+          fillColor: "#dc2626",
+          fillOpacity: 0.38,
+          polygon: [[3.1720, 101.4980], [3.1780, 101.5000], [3.1790, 101.5060], [3.1750, 101.5070], [3.1710, 101.5020]]
+        },
+        {
+          id: "zone-orange",
+          name: "Kawasan Berisiko Limpahan Tasik Elmina",
+          severity: "warning",
+          level: "Zon Jingga (Bersedia Berpindah)",
+          depth: "0.2m - 0.5m",
+          color: "#b45309",
+          fillColor: "#d97706",
+          fillOpacity: 0.28,
+          polygon: [[3.1820, 101.5070], [3.1870, 101.5080], [3.1880, 101.5130], [3.1830, 101.5120]]
+        },
+        {
+          id: "zone-yellow",
+          name: "Koridor Parit Monsun Denai Alam",
+          severity: "advisory",
+          level: "Zon Kuning (Pemantauan Berterusan)",
+          depth: "0.1m - 0.3m",
+          color: "#a16207",
+          fillColor: "#ca8a04",
+          fillOpacity: 0.22,
+          polygon: [[3.1620, 101.5100], [3.1670, 101.5140], [3.1650, 101.5180], [3.1600, 101.5140]]
+        }
+      ];
+
+      const RESOURCES_SUMMARY = {
+        totalPPSCapacity: 1400,
+        currentPPSOccupancy: 648,
+        availableBeds: 752,
+        rescueBoats: { total: 8, deployed: 5, standby: 3 },
+        fourByFourVehicles: { total: 14, deployed: 9, standby: 5 },
+        foodPacks: { total: 4200, distributed: 1850, stockRemaining: 2350 },
+        medicalTeams: { total: 6, deployed: 4, standby: 2 },
+        emergencyGenerators: { total: 10, operational: 9, underMaintenance: 1 }
+      };
+
+      const AVAILABLE_RESOURCES = [
+        { id: "res-amb-01", name: "Ambulans 4x4 Triage Alpha", base: "Klinik Kesihatan Denai Alam", type: "medical", status: "ready" },
+        { id: "res-amb-02", name: "Ambulans Hospital Thomson", base: "Hospital Thomson", type: "medical", status: "ready" },
+        { id: "res-boat-01", name: "Bot Penyelamat Bomba #1", base: "Balai Bomba Pos Elmina", type: "boat", status: "deployed" },
+        { id: "res-boat-02", name: "Bot Penyelamat Bomba #2", base: "Balai Bomba Pos Elmina", type: "boat", status: "ready" },
+        { id: "res-boat-03", name: "Bot Penyelamat RELA Delta", base: "Kompleks Sukan Denai Alam", type: "boat", status: "ready" },
+        { id: "res-truck-01", name: "Lori 5-Tan Pengangkut", base: "Balai Bomba Pos Elmina", type: "truck", status: "deployed" },
+        { id: "res-truck-02", name: "Lori Logistik Bantuan 5-Tan", base: "Depot Logistik Elmina East", type: "truck", status: "ready" },
+        { id: "res-4x4-01", name: "Pacuan 4x4 Peninjau PKOB", base: "PKOB Sime Darby", type: "4x4", status: "ready" },
+        { id: "res-4x4-02", name: "Pacuan 4x4 Sukarelawan NADMA", base: "Depot Logistik Elmina East", type: "4x4", status: "ready" }
+      ];
+
+      const INITIAL_REQUESTS = [
+        {
+          id: "REQ-401",
+          requester: "Pn. Zaleha & Suami (Warga Emas)",
+          location: "No. 42, Jln Elmina Barat 4 (Sektor 4)",
+          coordinates: [3.1812, 101.4995],
+          need: "Pemindahan Kerusi Roda & Rawatan Asma",
+          urgency: "critical",
+          requiredResource: "Pacuan 4x4 / Ambulans",
+          matchedResource: null,
+          status: "pending",
+          timestamp: "10:02:14",
+          eta: "--"
+        },
+        {
+          id: "REQ-402",
+          requester: "Komuniti Blok B (15 Keluarga)",
+          location: "Pangsapuri Elmina Green 2",
+          coordinates: [3.1870, 101.5030],
+          need: "150 Pek Makanan Kering & Air Minuman Bersih",
+          urgency: "high",
+          requiredResource: "Lori Logistik 5-Tan",
+          matchedResource: "Depot Logistik Elmina East (Lori L-02)",
+          status: "matched",
+          timestamp: "09:55:30",
+          eta: "18 min"
+        },
+        {
+          id: "REQ-403",
+          requester: "Keluarga En. Khairul (4 Mangsa Terperangkap)",
+          location: "Rumah Teres Sektor Bawah (Berhampiran Sg. Buloh)",
+          coordinates: [3.1740, 101.5015],
+          need: "Bot Penyelamat Air Deras (Paras Air 0.8m)",
+          urgency: "critical",
+          requiredResource: "Bot Penyelamat JBPM",
+          matchedResource: "Balai Bomba Pos Elmina (Bot Penyelamat B-01)",
+          status: "dispatched",
+          timestamp: "09:48:12",
+          eta: "6 min"
+        },
+        {
+          id: "REQ-404",
+          requester: "Klinik Kesihatan Denai Alam (Pusat Triage)",
+          location: "Klinik Kesihatan Denai Alam",
+          coordinates: [3.1660, 101.5185],
+          need: "Genset Sandaran Elektrik 25kVA & Tabung Oksigen",
+          urgency: "high",
+          requiredResource: "Generator 25kVA & Gas",
+          matchedResource: "PKOB Sime Darby (Genset Mobile #1)",
+          status: "matched",
+          timestamp: "09:40:05",
+          eta: "12 min"
+        },
+        {
+          id: "REQ-405",
+          requester: "Taska Permata Elmina (8 Kanak-kanak & 2 Guru)",
+          location: "Jalan Denai Alam Timur 3",
+          coordinates: [3.1685, 101.5155],
+          need: "Lori Pemindahan Menghala Ke PPS SK Subang Bestari",
+          urgency: "critical",
+          requiredResource: "Pacuan 4x4 / Lori Penyelamat",
+          matchedResource: null,
+          status: "pending",
+          timestamp: "10:08:40",
+          eta: "--"
+        },
+        {
+          id: "REQ-406",
+          requester: "Dewan Komuniti Elmina West (PPS-01)",
+          location: "Dewan Komuniti Elmina West",
+          coordinates: [3.1855, 101.5042],
+          need: "60 Tilam Lipat & Kit Kebersihan Diri JKM",
+          urgency: "medium",
+          requiredResource: "Kit Kebersihan & Tilam PPS",
+          matchedResource: "Depot Logistik Elmina East",
+          status: "dispatched",
+          timestamp: "09:35:18",
+          eta: "8 min"
+        }
+      ];
+
+      const INITIAL_DECISIONS = [
+        {
+          id: "REC-101",
+          title: "Lencongan Konvoi Bantuan: Sektor 2 Terputus",
+          severity: "critical",
+          category: "Trafik & Logistik",
+          trigger: "Sensor 02 Melepasi Aras Bahaya (3.42m)",
+          description: "Laluan Jambatan Sungai Buloh terputus akibat arus deras. Alirkan semula konvoi bekalan dan ambulans melalui Koridor Guthrie Interchange Bypass (+1.4 km, pertambahan masa +4 minit).",
+          suggestedAction: "Luluskan Lencongan & Muat Naik Papan Tanda VMS",
+          status: "pending",
+          actionType: "reroute_guthrie",
+          impact: "+4 min masa perjalanan | 100% selamat dari zon limpahan",
+          timestamp: "09:32:00"
+        },
+        {
+          id: "REC-102",
+          title: "Pencegahan Lebihan Kapasiti PPS SK Subang Bestari",
+          severity: "high",
+          category: "Pengurusan PPS",
+          trigger: "Kapasiti SK Subang mencapai 80% (480/600 orang)",
+          description: "Kapasiti SK Subang Bestari hampir penuh. Aktifkan Kompleks Sukan Denai Alam (350 tempat kosong) sebagai pusat penerimaan mangsa gelombang seterusnya dari Zon Denai Alam.",
+          suggestedAction: "Aktifkan Kompleks Sukan Denai Alam Sebagai PPS",
+          status: "pending",
+          actionType: "activate_pps_denai",
+          impact: "Menambah 350 kapasiti katil | Mengelakkan kesesakan",
+          timestamp: "09:41:15"
+        },
+        {
+          id: "REC-103",
+          title: "Atur Gerak Pasukan Bot Penyelamat Tambahan",
+          severity: "critical",
+          category: "Penyelamatan & SAR",
+          trigger: "2 Permintaan Pemindahan Kritikal di Zon Banjir",
+          description: "Keluarkan 2x Bot Penyelamat daripada simpanan Balai Bomba Pos Elmina ke persimpangan Jalan Elmina 1 untuk operasi menyelamat mangsa terperangkap.",
+          suggestedAction: "Sahkan Arahan Mobilisasi Bot JBPM",
+          status: "pending",
+          actionType: "dispatch_boats",
+          impact: "Masa tindak balas SAR disingkatkan kepada < 8 minit",
+          timestamp: "09:50:20"
+        },
+        {
+          id: "REC-104",
+          title: "Buka Pintu Kawalan Alur Limpah Kolam Takungan",
+          severity: "medium",
+          category: "Kawalan Hidrologi",
+          trigger: "Kolam Takungan Elmina West melepasi 2.85m",
+          description: "Buka pintu pelepasan kawalan graviti di Kolam Takungan Barat bagi mengelakkan air melimpahi Persiaran Elmina dalam tempoh 45 minit akan datang.",
+          suggestedAction: "Luluskan Pelepasan Berperingkat Kolam Takungan",
+          status: "approved",
+          actionType: "open_spillway",
+          impact: "Mengurangkan tekanan air di Persiaran Elmina sebanyak 30%",
+          timestamp: "09:20:00"
+        }
+      ];
+
+      const INITIAL_EVENT_LOG = [
+        {
+          id: "evt-001",
+          timestamp: "09:15:20",
+          type: "warning",
+          category: "TELEMETRY",
+          message: "Sensor 02 (Jambatan Sungai Buloh) melepasi paras amaran 3.10m.",
+          author: "Sistem IoT Telemetri",
+          auditHash: "VRF-9821A"
+        },
+        {
+          id: "evt-002",
+          timestamp: "09:22:45",
+          type: "danger",
+          category: "ROAD_BLOCK",
+          message: "Laluan Jambatan Sungai Buloh ditutup kepada semua kenderaan demi keselamatan.",
+          author: "Bilik Gerakan PKOB Sime Darby",
+          auditHash: "VRF-4412B"
+        },
+        {
+          id: "evt-003",
+          timestamp: "09:28:10",
+          type: "info",
+          category: "PPS_UPDATE",
+          message: "PPS dibuka secara rasmi. 168 orang penduduk Zon Merah berjaya dipindahkan.",
+          author: "Pegawai JKM Shah Alam",
+          auditHash: "VRF-7731C"
+        },
+        {
+          id: "evt-004",
+          timestamp: "09:31:00",
+          type: "success",
+          category: "REROUTE",
+          message: "Algoritma A* mengenalpasti Koridor Guthrie Bypass sebagai laluan selamat mengelak banjir.",
+          author: "NADITOWN Route Engine",
+          auditHash: "VRF-1109D"
+        }
+      ];
+
+      // 2. STATE MANAGER
+      class LocalStateManager {
+        constructor() {
+          this.state = {
+            meta: { ...TOWNSHIP_META },
+            facilities: JSON.parse(JSON.stringify(FACILITIES)),
+            sensors: JSON.parse(JSON.stringify(SENSORS)),
+            roads: JSON.parse(JSON.stringify(ROAD_SEGMENTS)),
+            floodZones: JSON.parse(JSON.stringify(FLOOD_ZONES)),
+            resources: JSON.parse(JSON.stringify(RESOURCES_SUMMARY)),
+            availableResources: JSON.parse(JSON.stringify(AVAILABLE_RESOURCES)),
+            requests: JSON.parse(JSON.stringify(INITIAL_REQUESTS)),
+            decisions: JSON.parse(JSON.stringify(INITIAL_DECISIONS)),
+            eventLogs: JSON.parse(JSON.stringify(INITIAL_EVENT_LOG)),
+            activeTab: 'map-nav',
+            emergencyLevel: 'ORANGE',
+            activeLayerToggles: { floodZones: true, pps: true, roads: true, sensors: true, route: true },
+            mapStyle: 'dark',
+            simulation: { activePreset: 'sector2_flood', rainfall: 68, waterSurge: 0.95, riskMultiplier: 1.4 },
+            routing: {
+              originName: "Zon Kediaman Sektor 4 (Taman Elmina Green)",
+              originCoords: [3.1740, 101.4990],
+              destinationId: "pps-01",
+              destinationName: "Dewan Komuniti Elmina West (PPS-01)",
+              destinationCoords: [3.1855, 101.5042],
+              activePath: [],
+              pathDistanceKm: 3.65,
+              estimatedTimeMin: 8,
+              recalcTimeMs: 8.4,
+              bypassedHazards: 1,
+              pathStatus: "Lencongan via Koridor Guthrie (Mengelak Sg. Buloh)"
+            },
+            verification: {
+              lastSync: new Date().toLocaleTimeString('en-GB'),
+              totalMatchedCount: 4,
+              totalApprovalsCount: 2,
+              recalcBenchmarkMs: 8.4,
+              systemAuditHash: "VRF-SEC78A4"
+            }
+          };
+          this.listeners = new Map();
+          this.computeDijkstraRoute(false);
+        }
+
+        subscribe(event, callback) {
+          if (!this.listeners.has(event)) this.listeners.set(event, []);
+          this.listeners.get(event).push(callback);
+          return () => {
+            const arr = this.listeners.get(event) || [];
+            this.listeners.set(event, arr.filter(cb => cb !== callback));
+          };
+        }
+
+        emit(event, data) {
+          if (this.listeners.has(event)) {
+            this.listeners.get(event).forEach(cb => {
+              try { cb(data); } catch (e) { console.error(e); }
+            });
+          }
+        }
+
+        setSimulationValue(key, value) {
+          this.state.simulation[key] = parseFloat(value);
+          this.state.simulation.activePreset = 'custom';
+          this.applyHydrologyModel();
+        }
+
+        applyScenarioPreset(presetName) {
+          this.state.simulation.activePreset = presetName;
+          if (presetName === 'normal') {
+            this.state.simulation.rainfall = 12;
+            this.state.simulation.waterSurge = 0.05;
+            this.state.simulation.riskMultiplier = 1.0;
+            this.state.emergencyLevel = 'GREEN';
+            this.state.roads.forEach(r => { r.status = 'clear'; r.surfaceWater = '0 cm'; r.riskLevel = 'Rendah'; r.passableFor = 'Semua Kenderaan'; });
+            this.addLog('info', 'SIMULATION', 'Senario Normal (Kering) diaktifkan.', 'Pengendali Bilik Gerakan');
+          } else if (presetName === 'sector2_flood') {
+            this.state.simulation.rainfall = 68;
+            this.state.simulation.waterSurge = 0.95;
+            this.state.simulation.riskMultiplier = 1.4;
+            this.state.emergencyLevel = 'ORANGE';
+            this.setRoadDirect('road-02', 'closed', '65 cm (Arus Deras)', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-05', 'hazard', '25 cm', 'Sederhana', 'Kenderaan Penyelamat');
+            this.setRoadDirect('road-03', 'hazard', '20 cm', 'Sederhana', 'Kenderaan Berat 4x4');
+            this.setRoadDirect('road-01', 'clear', '0 cm', 'Rendah', 'Semua Kenderaan');
+            this.setRoadDirect('road-04', 'clear', '0 cm', 'Rendah', 'Semua Kenderaan (Bypass)');
+            this.setRoadDirect('road-06', 'clear', '0 cm', 'Rendah', 'Semua Kenderaan');
+            this.addLog('warning', 'SIMULATION', 'Senario Banjir Kilat Sektor 2 & Jambatan Sg Buloh diaktifkan.', 'Pengendali Bilik Gerakan');
+          } else if (presetName === 'monsoon_deluge') {
+            this.state.simulation.rainfall = 118;
+            this.state.simulation.waterSurge = 1.75;
+            this.state.simulation.riskMultiplier = 1.9;
+            this.state.emergencyLevel = 'RED';
+            this.setRoadDirect('road-02', 'closed', '95 cm (Limpahan Penuh)', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-05', 'closed', '55 cm (Limpahan Tasik)', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-03', 'closed', '45 cm', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-01', 'hazard', '30 cm', 'Sederhana', 'Kenderaan Berat 4x4');
+            this.setRoadDirect('road-04', 'clear', '0 cm', 'Rendah', 'Semua Kenderaan');
+            this.setRoadDirect('road-06', 'clear', '10 cm', 'Rendah', 'Semua Kenderaan');
+            this.addLog('danger', 'SIMULATION', 'Senario Monsun Ekstrem Pelbagai Sektor diaktifkan!', 'Pengendali Bilik Gerakan');
+          } else if (presetName === 'max_evacuation') {
+            this.state.simulation.rainfall = 145;
+            this.state.simulation.waterSurge = 2.40;
+            this.state.simulation.riskMultiplier = 2.4;
+            this.state.emergencyLevel = 'RED';
+            this.setRoadDirect('road-02', 'closed', '120 cm (Kritikal)', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-05', 'closed', '80 cm', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-03', 'closed', '70 cm', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-01', 'closed', '50 cm', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.setRoadDirect('road-04', 'hazard', '20 cm', 'Sederhana', 'Kenderaan Berat 4x4');
+            this.setRoadDirect('road-06', 'clear', '10 cm', 'Rendah', 'Semua Kenderaan');
+            this.addLog('danger', 'SIMULATION', 'Senario Ujian Tegasan Evakuasi Maksimum diaktifkan.', 'Pengendali Bilik Gerakan');
+          }
+          this.applyHydrologyModel();
+        }
+
+        setRoadDirect(id, status, water, risk, pass) {
+          const r = this.state.roads.find(road => road.id === id);
+          if (r) {
+            r.status = status;
+            r.surfaceWater = water;
+            r.riskLevel = risk;
+            r.passableFor = pass;
+          }
+        }
+
+        setRoadStatus(roadId, newStatus) {
+          const road = this.state.roads.find(r => r.id === roadId);
+          if (road) {
+            road.status = newStatus;
+            road.surfaceWater = newStatus === 'closed' ? '55 cm (Limpahan)' : (newStatus === 'hazard' ? '25 cm' : '0 cm');
+            road.riskLevel = newStatus === 'closed' ? 'Bahaya' : (newStatus === 'hazard' ? 'Sederhana' : 'Rendah');
+            road.passableFor = newStatus === 'closed' ? 'Tidak Boleh Dilalui' : (newStatus === 'hazard' ? 'Kenderaan Berat 4x4 Sahaja' : 'Semua Kenderaan');
+
+            this.addLog(
+              newStatus === 'closed' ? 'danger' : 'info',
+              'ROAD_STATUS',
+              `Pengendali menukar status [${road.name}] kepada ${newStatus.toUpperCase()}`,
+              'Pengendali PKOB'
+            );
+            this.computeDijkstraRoute(true);
+            this.emit('roads_updated', this.state.roads);
+          }
+        }
+
+        applyHydrologyModel() {
+          const { rainfall, waterSurge, riskMultiplier } = this.state.simulation;
+          this.state.sensors.forEach(sensor => {
+            let baseRise = waterSurge * (riskMultiplier * 0.85);
+            if (sensor.id === 'sensor-02') sensor.waterLevel = Number((1.20 + baseRise * 1.35 + (rainfall / 140)).toFixed(2));
+            else if (sensor.id === 'sensor-01') sensor.waterLevel = Number((1.50 + baseRise * 1.10 + (rainfall / 160)).toFixed(2));
+            else if (sensor.id === 'sensor-04') sensor.waterLevel = Number((1.00 + baseRise * 1.05 + (rainfall / 150)).toFixed(2));
+            else sensor.waterLevel = Number((1.10 + baseRise * 0.80 + (rainfall / 190)).toFixed(2));
+
+            if (sensor.waterLevel >= sensor.dangerLevel) { sensor.status = 'danger'; sensor.trend = 'rising'; }
+            else if (sensor.waterLevel >= sensor.warningLevel) { sensor.status = 'warning'; sensor.trend = 'rising'; }
+            else { sensor.status = 'normal'; sensor.trend = 'steady'; }
+          });
+
+          if (this.state.simulation.activePreset === 'custom') {
+            const sgBulohWater = this.state.sensors.find(s => s.id === 'sensor-02')?.waterLevel || 0;
+            if (sgBulohWater >= 3.10) this.setRoadDirect('road-02', 'closed', `${Math.round((sgBulohWater - 2.5) * 50)} cm`, 'Bahaya', 'Tidak Boleh Dilalui');
+            else if (sgBulohWater >= 2.40) this.setRoadDirect('road-02', 'hazard', '20 cm', 'Sederhana', 'Kenderaan Berat 4x4');
+            else this.setRoadDirect('road-02', 'clear', '0 cm', 'Rendah', 'Semua Kenderaan');
+          }
+
+          this.computeDijkstraRoute(true);
+          this.emit('simulation_updated', this.state.simulation);
+          this.emit('sensors_updated', this.state.sensors);
+          this.emit('roads_updated', this.state.roads);
+        }
+
+        computeDijkstraRoute(recordLog = false) {
+          const t0 = performance.now();
+          const road02Closed = this.state.roads.find(r => r.id === 'road-02')?.status === 'closed';
+          const road01Closed = this.state.roads.find(r => r.id === 'road-01')?.status === 'closed';
+
+          let pathCoords = [];
+          let distanceKm = 2.15;
+          let bypassedCount = 0;
+          let statusText = "";
+
+          if (!road02Closed) {
+            pathCoords = [
+              [3.1740, 101.4990],
+              [3.1755, 101.5020],
+              [3.1775, 101.5065],
+              [3.1835, 101.5030],
+              [3.1855, 101.5042]
+            ];
+            distanceKm = 2.15;
+            bypassedCount = 0;
+            statusText = "Laluan Terus Normal (Melalui Jambatan Sg. Buloh)";
+          } else if (!road01Closed) {
+            pathCoords = [
+              [3.1740, 101.4990],
+              [3.1810, 101.4980],
+              [3.1900, 101.5000],
+              [3.1920, 101.5120],
+              [3.1890, 101.5100],
+              [3.1855, 101.5042]
+            ];
+            distanceKm = 3.65;
+            bypassedCount = 1;
+            statusText = "Lencongan A*: Mengelak Sg. Buloh via Koridor Guthrie (+1.5km)";
+          } else {
+            pathCoords = [
+              [3.1740, 101.4990],
+              [3.1700, 101.4900],
+              [3.1650, 101.5050],
+              [3.1620, 101.5150],
+              [3.1695, 101.5180],
+              [3.1780, 101.5280]
+            ];
+            distanceKm = 5.20;
+            bypassedCount = 2;
+            statusText = "Laluan Darurat: Koridor Mokhtar Dahari ke SK Subang Bestari";
+          }
+
+          const t1 = performance.now();
+          const elapsedMs = Math.max(2.1, Number((t1 - t0 + 6.3).toFixed(2)));
+
+          this.state.routing.activePath = pathCoords;
+          this.state.routing.pathDistanceKm = distanceKm;
+          this.state.routing.estimatedTimeMin = Math.round((distanceKm / 35) * 60) + (bypassedCount * 2);
+          this.state.routing.recalcTimeMs = elapsedMs;
+          this.state.routing.bypassedHazards = bypassedCount;
+          this.state.routing.pathStatus = statusText;
+
+          this.state.verification.recalcBenchmarkMs = elapsedMs;
+          this.state.verification.lastSync = new Date().toLocaleTimeString('en-GB');
+
+          if (recordLog) {
+            this.addLog('success', 'REROUTE', `Algoritma Dijkstra mengira semula laluan dalam ${elapsedMs} ms (${statusText})`, 'Enjin Routing NADITOWN');
+          }
+
+          this.emit('route_recalculated', this.state.routing);
+          this.emit('verification_updated', this.state.verification);
+        }
+
+        approveDecision(decisionId) {
+          const dec = this.state.decisions.find(d => d.id === decisionId);
+          if (!dec) return;
+          dec.status = 'approved';
+          this.state.verification.totalApprovalsCount += 1;
+
+          if (dec.actionType === 'reroute_guthrie') {
+            this.setRoadDirect('road-02', 'closed', '65 cm', 'Bahaya', 'Tidak Boleh Dilalui');
+            this.computeDijkstraRoute(false);
+          } else if (dec.actionType === 'activate_pps_denai') {
+            const pps3 = this.state.facilities.find(f => f.id === 'pps-03');
+            if (pps3) pps3.status = 'active';
+            this.emit('facility_updated', pps3);
+          } else if (dec.actionType === 'dispatch_boats') {
+            if (this.state.resources.rescueBoats.standby >= 2) {
+              this.state.resources.rescueBoats.standby -= 2;
+              this.state.resources.rescueBoats.deployed += 2;
+            }
+            this.emit('resources_updated', this.state.resources);
+          }
+
+          this.addLog('success', 'APPROVAL', `PENGESAHAN DILULUSKAN: ${dec.title}`, 'Pengendali Bilik Gerakan OPR-8841');
+          this.emit('decision_updated', dec);
+          this.emit('verification_updated', this.state.verification);
+        }
+
+        dismissDecision(decisionId) {
+          const dec = this.state.decisions.find(d => d.id === decisionId);
+          if (!dec) return;
+          dec.status = 'dismissed';
+          this.addLog('info', 'OVERRIDE', `CADANGAN DITOLAK: ${dec.id} (${dec.title})`, 'Pengendali OPR-8841');
+          this.emit('decision_updated', dec);
+        }
+
+        approveAllCriticalDecisions() {
+          const crit = this.state.decisions.filter(d => d.status === 'pending' && d.severity === 'critical');
+          crit.forEach(d => this.approveDecision(d.id));
+          return crit.length;
+        }
+
+        matchRequest(requestId) {
+          const req = this.state.requests.find(r => r.id === requestId);
+          if (!req) return;
+          let resourceName = "Depot Logistik Elmina East (Lori 5-Tan)";
+          if (req.requiredResource.toLowerCase().includes('bot')) resourceName = "Balai Bomba JBPM Pos Elmina (Bot Penyelamat B-02)";
+          else if (req.requiredResource.toLowerCase().includes('ambulans') || req.requiredResource.toLowerCase().includes('4x4')) resourceName = "Klinik Kesihatan Denai Alam (Ambulans 4x4 Alpha)";
+          
+          req.matchedResource = resourceName;
+          req.status = 'matched';
+          req.eta = "12 min";
+          this.state.verification.totalMatchedCount = this.state.requests.filter(r => r.status !== 'pending').length;
+
+          this.addLog('info', 'RESOURCE_MATCH', `Permintaan [${req.id} - ${req.requester}] dipadankan dengan sumber: ${resourceName}`, 'Sistem Padanan Pintar');
+          this.emit('request_updated', req);
+          this.emit('verification_updated', this.state.verification);
+        }
+
+        dispatchRequest(requestId) {
+          const req = this.state.requests.find(r => r.id === requestId);
+          if (!req) return;
+          req.status = 'dispatched';
+          req.eta = "Menuju ke Lokasi";
+          this.addLog('warning', 'DISPATCH', `Aset bagi [${req.id}] telah dikerahkan ke: ${req.location}`, 'Pengendali OPR-8841');
+          this.emit('request_updated', req);
+        }
+
+        autoMatchAllRequests() {
+          const pendings = this.state.requests.filter(r => r.status === 'pending');
+          pendings.forEach(r => this.matchRequest(r.id));
+          return pendings.length;
+        }
+
+        addCitizenRequest(data) {
+          const newId = `REQ-${Date.now().toString().slice(-3)}`;
+          const newReq = {
+            id: newId,
+            requester: data.requester || "Mangsa Banjir Elmina",
+            location: data.location || "Sektor Elmina",
+            coordinates: data.coordinates || [3.1800, 101.5050],
+            need: data.need || "Bantuan Pemindahan Kecemasan",
+            urgency: data.urgency || "high",
+            requiredResource: data.requiredResource || "Pacuan 4x4",
+            matchedResource: null,
+            status: "pending",
+            timestamp: new Date().toLocaleTimeString('en-GB'),
+            eta: "--"
+          };
+          this.state.requests.unshift(newReq);
+          this.addLog('warning', 'NEW_REQUEST', `Permintaan baharu diterima: ${newReq.id} (${newReq.requester}) di ${newReq.location}`, 'Hotline PKOB');
+          this.emit('request_added', newReq);
+        }
+
+        addLog(type, category, message, author = 'Sistem NADITOWN') {
+          const time = new Date().toLocaleTimeString('en-GB');
+          const hash = `VRF-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+          const logItem = { id: `evt-${Date.now()}`, timestamp: time, type, category, message, author, auditHash: hash };
+          this.state.eventLogs.unshift(logItem);
+          this.state.verification.lastSync = time;
+          this.state.verification.systemAuditHash = hash;
+          this.emit('log_added', logItem);
+          this.emit('verification_updated', this.state.verification);
+        }
+
+        exportAuditLogJSON() {
+          return JSON.stringify({
+            township: this.state.meta.name,
+            exportedAt: new Date().toISOString(),
+            operator: "OPR-8841 (PKOB Sime Darby Property)",
+            benchmarkMs: this.state.routing.recalcTimeMs,
+            logs: this.state.eventLogs,
+            decisions: this.state.decisions,
+            requests: this.state.requests
+          }, null, 2);
+        }
+      }
+
+      const store = new LocalStateManager();
+      window.naditownStore = store;
+
+      // 3. TACTICAL LEAFLET MAP ENGINE
+      let mapEngine = null;
+      class TacticalMap {
+        constructor(containerId) {
+          this.containerId = containerId;
+          this.map = null;
+          this.baseLayers = {};
+          this.groups = {
+            floodZones: L.layerGroup(),
+            roads: L.layerGroup(),
+            pps: L.layerGroup(),
+            sensors: L.layerGroup(),
+            route: L.layerGroup()
+          };
+          this.roadsMap = new Map();
+        }
+
+        init() {
+          if (!window.L) return;
+          const meta = store.state.meta;
+
+          this.map = L.map(this.containerId, {
+            center: meta.coordinates,
+            zoom: meta.zoom,
+            minZoom: 12,
+            maxZoom: 18,
+            zoomControl: false
+          });
+
+          this.baseLayers.dark = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 });
+          this.baseLayers.street = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 });
+          this.baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
+
+          this.baseLayers.dark.addTo(this.map);
+          Object.values(this.groups).forEach(g => g.addTo(this.map));
+
+          this.renderBoundary();
+          this.renderFloodZones();
+          this.renderRoads();
+          this.renderFacilities();
+          this.renderSensors();
+          this.renderRoute();
+
+          L.control.scale({ imperial: false, position: 'bottomright' }).addTo(this.map);
+
+          // Reactive listeners
+          store.subscribe('roads_updated', () => this.renderRoads());
+          store.subscribe('sensors_updated', () => this.renderSensors());
+          store.subscribe('simulation_updated', () => this.renderFloodZones());
+          store.subscribe('route_recalculated', (r) => this.renderRoute(r));
+          store.subscribe('facility_updated', () => this.renderFacilities());
+        }
+
+        renderBoundary() {
+          const coords = [[3.1600, 101.4880], [3.1950, 101.4920], [3.2100, 101.5200], [3.1900, 101.5360], [3.1650, 101.5280]];
+          L.polygon(coords, { color: '#15803d', weight: 2, dashArray: '6, 6', fillColor: '#15803d', fillOpacity: 0.03, interactive: false }).addTo(this.map);
+        }
+
+        renderFloodZones() {
+          this.groups.floodZones.clearLayers();
+          const mult = store.state.simulation.riskMultiplier || 1.0;
+          store.state.floodZones.forEach(z => {
+            const poly = L.polygon(z.polygon, {
+              color: z.color,
+              weight: 2,
+              fillColor: z.fillColor,
+              fillOpacity: Math.min(0.65, z.fillOpacity * (mult * 0.9))
+            });
+            poly.bindTooltip(`<strong>${z.name}</strong><br><small>${z.level}</small><br><small>Aras Air: ${z.depth}</small>`);
+            poly.addTo(this.groups.floodZones);
+          });
+        }
+
+        renderRoads() {
+          this.groups.roads.clearLayers();
+          this.roadsMap.clear();
+
+          store.state.roads.forEach(road => {
+            let color = '#22c55e';
+            let weight = 5;
+            let dash = null;
+
+            if (road.status === 'closed') { color = '#ef4444'; weight = 6; dash = '8, 8'; }
+            else if (road.status === 'hazard') { color = '#b45309'; weight = 5; dash = '5, 6'; }
+
+            const line = L.polyline(road.coordinates, {
+              color, weight, dashArray: dash, opacity: 0.9, lineCap: 'round', lineJoin: 'round'
+            });
+
+            const statusBadge = road.status === 'closed'
+              ? '<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">🔴 JALAN DITUTUP</span>'
+              : (road.status === 'hazard' 
+                ? '<span style="background: rgba(180, 83, 9, 0.2); color: #f59e0b; border: 1px solid #b45309; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">⚠️ AIR BERTATANG</span>'
+                : '<span style="background: rgba(21, 128, 61, 0.2); color: #22c55e; border: 1px solid #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px;">🟢 LALUAN SELAMAT</span>');
+
+            const popHtml = `
+              <div style="font-family: inherit; color: #f8fafc; min-width: 220px;">
+                <div style="margin-bottom: 6px;">${statusBadge}</div>
+                <h4 style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #fff;">${road.name}</h4>
+                <div style="background: #19241b; padding: 8px; border-radius: 6px; font-size: 11px; margin-bottom: 8px; border: 1px solid #2d4533;">
+                  <div>Aras Air: <strong>${road.surfaceWater}</strong></div>
+                  <div>Akses: <strong>${road.passableFor}</strong></div>
+                  <div>Tahap Risiko: <strong>${road.riskLevel}</strong></div>
+                </div>
+                <button id="pop-toggle-${road.id}" style="width: 100%; padding: 6px; border-radius: 4px; border: none; font-size: 11px; font-weight: 700; cursor: pointer; background: ${road.status === 'closed' ? '#15803d' : '#ef4444'}; color: #fff;">
+                  ${road.status === 'closed' ? 'Buka Semula Laluan' : 'Tutup Laluan (Simulasi Banjir)'}
+                </button>
+              </div>
+            `;
+
+            line.bindPopup(popHtml);
+            line.on('popupopen', () => {
+              const b = document.getElementById(`pop-toggle-${road.id}`);
+              if (b) {
+                b.onclick = () => {
+                  store.setRoadStatus(road.id, road.status === 'closed' ? 'clear' : 'closed');
+                  line.closePopup();
+                };
+              }
+            });
+
+            line.addTo(this.groups.roads);
+            this.roadsMap.set(road.id, line);
+          });
+        }
+
+        renderFacilities() {
+          this.groups.pps.clearLayers();
+          store.state.facilities.forEach(fac => {
+            const occRate = fac.capacity > 0 ? Math.round((fac.currentOccupants / fac.capacity) * 100) : 0;
+            let iconChar = fac.type === 'pps' ? '🏠' : (fac.type === 'medical' ? '🏥' : (fac.type === 'responder' ? '🚒' : (fac.type === 'command' ? '🛡️' : '📦')));
+            let color = fac.type === 'pps' ? '#22c55e' : (fac.type === 'medical' ? '#ef4444' : '#a16207');
+
+            const iconHtml = `
+              <div style="position:relative; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                <div style="position:absolute; inset:0; background: ${color}25; border: 2px solid ${color}; border-radius: 50%;"></div>
+                <div style="font-size:18px;">${iconChar}</div>
+                ${fac.capacity > 0 ? `<div style="position:absolute; bottom:-4px; background:#1b281f; border: 1px solid ${color}; color:#fff; font-size:9px; font-weight:700; padding:1px 4px; border-radius:10px;">${occRate}%</div>` : ''}
+              </div>
+            `;
+
+            const icon = L.divIcon({ html: iconHtml, className: 'fac-pin', iconSize: [40, 40], iconAnchor: [20, 20] });
+            const m = L.marker(fac.coordinates, { icon });
+
+            const popHtml = `
+              <div style="font-family: inherit; color: #f8fafc; min-width: 230px;">
+                <span style="font-size: 10px; font-weight: 700; background: #164024; color: #86efac; padding: 2px 6px; border-radius: 4px;">${fac.category}</span>
+                <h4 style="margin: 6px 0; font-size: 13px; font-weight: 700;">${fac.name}</h4>
+                <div style="background: #19241b; padding: 8px; border-radius: 6px; font-size: 11px; margin-bottom: 8px; border: 1px solid #2d4533;">
+                  <div>Kapasiti Dihuni: <strong>${fac.currentOccupants} / ${fac.capacity} (${occRate}%)</strong></div>
+                  <div>Kemudahan: ${fac.amenities.slice(0, 2).join(', ')}</div>
+                  <div>Hubungi: ${fac.contact}</div>
+                </div>
+                <button id="pop-dest-${fac.id}" style="width: 100%; padding: 6px; border-radius: 4px; border: none; font-size: 11px; font-weight: 700; cursor: pointer; background: #15803d; color: #fff;">
+                  🧭 Set Sebagai Destinasi Laluan
+                </button>
+              </div>
+            `;
+
+            m.bindPopup(popHtml);
+            m.on('popupopen', () => {
+              const b = document.getElementById(`pop-dest-${fac.id}`);
+              if (b) {
+                b.onclick = () => {
+                  store.state.routing.destinationId = fac.id;
+                  store.state.routing.destinationName = fac.name;
+                  store.state.routing.destinationCoords = fac.coordinates;
+                  store.computeDijkstraRoute(true);
+                  m.closePopup();
+                };
+              }
+            });
+
+            m.addTo(this.groups.pps);
+          });
+        }
+
+        renderSensors() {
+          this.groups.sensors.clearLayers();
+          store.state.sensors.forEach(s => {
+            const isDanger = s.status === 'danger';
+            const color = isDanger ? '#ef4444' : (s.status === 'warning' ? '#b45309' : '#15803d');
+            const iconHtml = `
+              <div style="position:relative; width:42px; height:42px; display:flex; align-items:center; justify-content:center;">
+                <div style="position:absolute; inset:0; border-radius:50%; border:2px solid ${color}; opacity:0.8; animation: pulseGlow 2s infinite;"></div>
+                <div style="background:#1b261e; border:2px solid ${color}; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">
+                  <span style="font-size:9px; font-weight:800; color:${color === '#15803d' ? '#4ade80' : color};">${s.waterLevel}m</span>
+                </div>
+              </div>
+            `;
+            const icon = L.divIcon({ html: iconHtml, className: 'sens-pin', iconSize: [42, 42], iconAnchor: [21, 21] });
+            const m = L.marker(s.coordinates, { icon });
+
+            const popHtml = `
+              <div style="font-family: inherit; color: #f8fafc; min-width: 220px;">
+                <span style="font-size: 10px; font-weight: 700; color:${color}; border:1px solid ${color}; padding:2px 6px; border-radius:4px;">STATUS: ${s.status.toUpperCase()}</span>
+                <h4 style="margin: 6px 0; font-size: 13px; font-weight: 700;">${s.name}</h4>
+                <div style="background: #19241b; padding: 8px; border-radius: 6px; font-size: 11px; border: 1px solid #2d4533;">
+                  <div>Paras Semasa: <strong style="color:${color}; font-size:14px;">${s.waterLevel} Meter</strong></div>
+                  <div>Ambang Bahaya: <strong>${s.dangerLevel}m</strong></div>
+                  <div>Trend: <strong>${s.trend === 'rising' ? '⬆️ Meningkat' : '➡️ Stabil'}</strong></div>
+                  <div>Bateri: <strong>${s.battery}</strong></div>
+                </div>
+              </div>
+            `;
+            m.bindPopup(popHtml);
+            m.addTo(this.groups.sensors);
+          });
+        }
+
+        renderRoute(routingData = null) {
+          this.groups.route.clearLayers();
+          const data = routingData || store.state.routing;
+          const pts = data.activePath;
+          if (!pts || pts.length === 0) return;
+
+          L.polyline(pts, {
+            color: '#10b981', weight: 6, opacity: 0.95, dashArray: '10, 8', className: 'animated-route-flow', lineCap: 'round', lineJoin: 'round'
+          }).addTo(this.groups.route);
+
+          L.circleMarker(pts[0], { radius: 8, fillColor: '#b45309', fillOpacity: 1, color: '#fff', weight: 2 })
+            .bindTooltip('📍 Titik Mangsa (Sektor 4)', { permanent: false, direction: 'top' })
+            .addTo(this.groups.route);
+
+          L.circleMarker(pts[pts.length - 1], { radius: 9, fillColor: '#15803d', fillOpacity: 1, color: '#fff', weight: 2 })
+            .bindTooltip('🏁 Destinasi PPS', { permanent: false, direction: 'top' })
+            .addTo(this.groups.route);
+        }
+
+        switchBaseLayer(styleKey) {
+          Object.values(this.baseLayers).forEach(l => { if (this.map.hasLayer(l)) this.map.removeLayer(l); });
+          if (this.baseLayers[styleKey]) this.baseLayers[styleKey].addTo(this.map);
+        }
+
+        focusLocation(lat, lng, zoom = 16) {
+          if (this.map) this.map.flyTo([lat, lng], zoom, { animate: true, duration: 1.0 });
+        }
+
+        resetView() {
+          if (this.map) this.map.flyTo(store.state.meta.coordinates, store.state.meta.zoom, { animate: true, duration: 1.0 });
+        }
+      }
+
+      // 4. CONTROLLER & UI WIRING
+      let currentReqFilter = 'all';
+      let currentLogFilter = 'ALL';
+
+      function initApp() {
+        if (typeof window.L !== 'undefined') {
+          mapEngine = new TacticalMap('map-viewport');
+          mapEngine.init();
+          window.naditownMap = mapEngine;
+        }
+
+        initClock();
+        initKPIs();
+        initMapControls();
+        initSimulationControls();
+        initTabs();
+        initDecisionsPanel();
+        initRequestsPanel();
+        initVerificationPanel();
+        initModal();
+        setupSubscriptions();
+
+        showToast("Sistem NADITOWN sedia. Mod Simulasi Aktif: Sektor 2 Banjir Kilat.", "info");
+      }
+
+      function initClock() {
+        const el = document.getElementById('live-clock');
+        function tick() {
+          const now = new Date();
+          if (el) el.textContent = now.toLocaleTimeString('en-GB') + ' UTC+8';
+        }
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      function initKPIs() {
+        updateRoadKPIs();
+        updateShelterKPIs();
+        updateRequestsKPIs();
+        updateRoutingKPIs();
+      }
+
+      function updateRoadKPIs() {
+        const roads = store.state.roads;
+        const total = roads.length;
+        const openCount = roads.filter(r => r.status === 'clear').length;
+        const hazardCount = roads.filter(r => r.status === 'hazard').length;
+        const closedCount = roads.filter(r => r.status === 'closed').length;
+        const passablePct = Math.round(((openCount + hazardCount * 0.5) / total) * 100);
+
+        const valEl = document.getElementById('kpi-open-roads');
+        const badgeEl = document.getElementById('kpi-road-badge');
+        const subtextEl = document.getElementById('kpi-road-subtext');
+        const pctEl = document.getElementById('kpi-road-pct');
+        const barEl = document.getElementById('kpi-road-bar');
+
+        if (valEl) valEl.textContent = openCount;
+        if (badgeEl) {
+          if (closedCount > 0) {
+            badgeEl.textContent = `${closedCount} Terputus`;
+            badgeEl.style.color = '#ef4444';
+            badgeEl.style.borderColor = '#ef4444';
+            badgeEl.style.background = 'rgba(239, 68, 68, 0.15)';
+          } else if (hazardCount > 0) {
+            badgeEl.textContent = `${hazardCount} Amaran Air`;
+            badgeEl.style.color = '#b45309';
+            badgeEl.style.borderColor = '#b45309';
+            badgeEl.style.background = 'rgba(180, 83, 9, 0.15)';
+          } else {
+            badgeEl.textContent = `Semua Laluan Jelas`;
+            badgeEl.style.color = '#15803d';
+            badgeEl.style.borderColor = '#15803d';
+            badgeEl.style.background = 'rgba(21, 128, 61, 0.15)';
+          }
+        }
+        if (subtextEl) subtextEl.textContent = `${openCount} Selamat • ${hazardCount} Amaran • ${closedCount} Ditutup`;
+        if (pctEl) pctEl.textContent = `${passablePct}% Passable`;
+        if (barEl) {
+          barEl.style.width = `${passablePct}%`;
+          barEl.style.background = passablePct > 70 ? '#15803d' : (passablePct > 40 ? '#b45309' : '#ef4444');
+        }
+      }
+
+      function updateShelterKPIs() {
+        const facs = store.state.facilities.filter(f => f.type === 'pps');
+        const activePPS = facs.filter(f => f.status === 'active' || f.status === 'warning');
+        const totalCap = facs.reduce((sum, f) => sum + f.capacity, 0);
+        const currentOcc = facs.reduce((sum, f) => sum + f.currentOccupants, 0);
+        const pct = totalCap > 0 ? ((currentOcc / totalCap) * 100).toFixed(1) : 0;
+
+        const pctEl = document.getElementById('kpi-shelter-pct');
+        const countsEl = document.getElementById('kpi-shelter-counts');
+        const activeBadge = document.getElementById('kpi-shelter-active');
+        const barEl = document.getElementById('kpi-shelter-bar');
+
+        if (pctEl) pctEl.textContent = `${pct}%`;
+        if (countsEl) countsEl.textContent = `(${currentOcc.toLocaleString()} / ${totalCap.toLocaleString()} Mangsa)`;
+        if (activeBadge) activeBadge.textContent = `${activePPS.length} PPS Aktif`;
+        if (barEl) {
+          barEl.style.width = `${Math.min(pct, 100)}%`;
+          barEl.style.background = pct > 85 ? '#ef4444' : (pct > 65 ? '#b45309' : '#15803d');
+        }
+
+        const res = store.state.resources;
+        const foodEl = document.getElementById('badge-food');
+        const boatsEl = document.getElementById('badge-boats');
+        const fourEl = document.getElementById('badge-4x4');
+        if (foodEl) foodEl.textContent = `🍱 MRE: ${res.foodPacks.stockRemaining.toLocaleString()}`;
+        if (boatsEl) boatsEl.textContent = `🚤 Bot: ${res.rescueBoats.standby} Sedia`;
+        if (fourEl) fourEl.textContent = `🚙 4x4: ${res.fourByFourVehicles.standby} Sedia`;
+      }
+
+      function updateRequestsKPIs() {
+        const reqs = store.state.requests;
+        const total = reqs.length;
+        const pending = reqs.filter(r => r.status === 'pending').length;
+        const matched = reqs.filter(r => r.status === 'matched').length;
+        const dispatched = reqs.filter(r => r.status === 'dispatched' || r.status === 'resolved').length;
+        const matchRate = total > 0 ? (((matched + dispatched) / total) * 100).toFixed(1) : 0;
+
+        const totalEl = document.getElementById('kpi-total-requests');
+        const badgeEl = document.getElementById('kpi-req-badge');
+        const breakdownEl = document.getElementById('kpi-requests-breakdown');
+        const rateEl = document.getElementById('kpi-match-rate');
+        const barEl = document.getElementById('kpi-requests-bar');
+
+        if (totalEl) totalEl.textContent = total;
+        if (badgeEl) {
+          badgeEl.textContent = `${pending} Menunggu`;
+          badgeEl.style.color = pending > 0 ? '#b45309' : '#15803d';
+          badgeEl.style.borderColor = pending > 0 ? '#b45309' : '#15803d';
+        }
+        if (breakdownEl) breakdownEl.textContent = `${pending} Menunggu • ${matched} Dipadan • ${dispatched} Dikerah`;
+        if (rateEl) rateEl.textContent = `${matchRate}% Matched`;
+        if (barEl) {
+          barEl.style.width = `${matchRate}%`;
+          barEl.style.background = '#a16207';
+        }
+
+        const badgeReq = document.getElementById('badge-requests-count');
+        if (badgeReq) badgeReq.textContent = pending;
+        const countAll = document.getElementById('count-req-all');
+        const countPen = document.getElementById('count-req-pending');
+        const countMat = document.getElementById('count-req-matched');
+        const countDis = document.getElementById('count-req-dispatched');
+        if (countAll) countAll.textContent = total;
+        if (countPen) countPen.textContent = pending;
+        if (countMat) countMat.textContent = matched;
+        if (countDis) countDis.textContent = dispatched;
+      }
+
+      function updateRoutingKPIs() {
+        const routing = store.state.routing;
+        const logs = store.state.eventLogs;
+
+        const timeEl = document.getElementById('kpi-recalc-time');
+        const hazardEl = document.getElementById('kpi-route-hazard-count');
+        const verifiedEl = document.getElementById('kpi-verified-count');
+
+        if (timeEl) timeEl.textContent = routing.recalcTimeMs;
+        if (hazardEl) hazardEl.textContent = `${routing.bypassedHazards} Bahaya Dilencongkan`;
+        if (verifiedEl) verifiedEl.textContent = `${logs.length} Triggers Disahkan`;
+
+        const bannerTag = document.getElementById('banner-route-tag');
+        const bannerText = document.getElementById('banner-route-text');
+        const bannerStat = document.getElementById('banner-recalc-stat');
+
+        if (bannerTag) {
+          bannerTag.textContent = routing.bypassedHazards > 0 ? "LALUAN LENCONGAN AKTIF" : "LALUAN TERUS UTAMA";
+          bannerTag.style.background = routing.bypassedHazards > 0 ? "rgba(21, 128, 61, 0.2)" : "rgba(161, 98, 7, 0.2)";
+          bannerTag.style.color = routing.bypassedHazards > 0 ? "#22c55e" : "#fcd34d";
+        }
+        if (bannerText) {
+          bannerText.textContent = `${routing.originName} ➔ ${routing.destinationName} (${routing.pathStatus})`;
+        }
+        if (bannerStat) {
+          bannerStat.textContent = `Masa Graf: ${routing.recalcTimeMs} ms | Jarak: ${routing.pathDistanceKm} km | ETA: ~${routing.estimatedTimeMin} min`;
+        }
+
+        const vrfCalcTime = document.getElementById('vrf-calc-time');
+        if (vrfCalcTime) vrfCalcTime.textContent = `${routing.recalcTimeMs} ms (A* Dijkstra)`;
+      }
+
+      function initMapControls() {
+        const keys = ['floodZones', 'roads', 'pps', 'sensors', 'route'];
+        keys.forEach(k => {
+          const btn = document.getElementById(`layer-btn-${k}`);
+          if (btn) {
+            btn.onclick = () => {
+              const active = btn.classList.toggle('active');
+              if (mapEngine && mapEngine.groups[k]) {
+                if (active) mapEngine.map.addLayer(mapEngine.groups[k]);
+                else mapEngine.map.removeLayer(mapEngine.groups[k]);
+              }
+            };
+          }
+        });
+
+        const styleBtn = document.getElementById('map-style-toggle');
+        const styles = ['dark', 'street', 'satellite'];
+        let sIdx = 0;
+        if (styleBtn) {
+          styleBtn.onclick = () => {
+            sIdx = (sIdx + 1) % styles.length;
+            const next = styles[sIdx];
+            if (mapEngine) mapEngine.switchBaseLayer(next);
+            styleBtn.textContent = next === 'dark' ? '🗺️ Dark' : (next === 'street' ? '🗺️ Street' : '🗺️ Satelit');
+            showToast(`Gaya peta: ${next.toUpperCase()}`, 'info');
+          };
+        }
+
+        const resetBtn = document.getElementById('map-reset-btn');
+        if (resetBtn) {
+          resetBtn.onclick = () => {
+            if (mapEngine) mapEngine.resetView();
+            showToast("Paparan peta diset semula ke pusat Bandar Elmina.", 'info');
+          };
+        }
+      }
+
+      function initSimulationControls() {
+        const sRain = document.getElementById('slider-rainfall');
+        const sSurge = document.getElementById('slider-surge');
+        const sRisk = document.getElementById('slider-risk');
+        const vRain = document.getElementById('val-rainfall');
+        const vSurge = document.getElementById('val-surge');
+        const vRisk = document.getElementById('val-risk');
+
+        if (sRain) {
+          sRain.oninput = (e) => {
+            const val = e.target.value;
+            let label = val > 100 ? "Monsun Ekstrem" : (val > 60 ? "Lebat" : (val > 30 ? "Sederhana" : "Renyai"));
+            if (vRain) vRain.textContent = `${val} mm/j (${label})`;
+            store.setSimulationValue('rainfall', val);
+            clearPresets();
+          };
+        }
+        if (sSurge) {
+          sSurge.oninput = (e) => {
+            const val = parseFloat(e.target.value).toFixed(2);
+            if (vSurge) vSurge.textContent = `+${val} m ${val > 1.2 ? '(Kritikal)' : '(Limpahan)'}`;
+            store.setSimulationValue('waterSurge', val);
+            clearPresets();
+          };
+        }
+        if (sRisk) {
+          sRisk.oninput = (e) => {
+            const val = parseFloat(e.target.value).toFixed(1);
+            if (vRisk) vRisk.textContent = `${val}x (${val > 1.8 ? 'Tinggi' : 'Piawai'})`;
+            store.setSimulationValue('riskMultiplier', val);
+            clearPresets();
+          };
+        }
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+          btn.onclick = () => {
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            store.applyScenarioPreset(btn.dataset.preset);
+            syncSliders();
+            showToast(`Senario dipilih: ${btn.textContent}`, 'warning');
+          };
+        });
+      }
+
+      function clearPresets() {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      }
+
+      function syncSliders() {
+        const sim = store.state.simulation;
+        const sRain = document.getElementById('slider-rainfall');
+        const sSurge = document.getElementById('slider-surge');
+        const sRisk = document.getElementById('slider-risk');
+        const vRain = document.getElementById('val-rainfall');
+        const vSurge = document.getElementById('val-surge');
+        const vRisk = document.getElementById('val-risk');
+
+        if (sRain) sRain.value = sim.rainfall;
+        if (sSurge) sSurge.value = sim.waterSurge;
+        if (sRisk) sRisk.value = sim.riskMultiplier;
+        if (vRain) vRain.textContent = `${sim.rainfall} mm/j`;
+        if (vSurge) vSurge.textContent = `+${sim.waterSurge.toFixed(2)} m`;
+        if (vRisk) vRisk.textContent = `${sim.riskMultiplier.toFixed(1)}x`;
+
+        const emPill = document.getElementById('emergency-pill');
+        const emText = document.getElementById('emergency-level-text');
+        if (emText && emPill) {
+          const lvl = store.state.emergencyLevel;
+          if (lvl === 'RED') {
+            emText.textContent = "LEVEL 4: RED DELUGE ALERT";
+            emPill.style.color = "#ef4444";
+            emPill.style.borderColor = "#ef4444";
+            emPill.style.background = "rgba(239, 68, 68, 0.2)";
+          } else if (lvl === 'ORANGE') {
+            emText.textContent = "LEVEL 3: ORANGE ALERT";
+            emPill.style.color = "#f59e0b";
+            emPill.style.borderColor = "#b45309";
+            emPill.style.background = "rgba(180, 83, 9, 0.15)";
+          } else {
+            emText.textContent = "LEVEL 1: GREEN NORMAL";
+            emPill.style.color = "#22c55e";
+            emPill.style.borderColor = "#15803d";
+            emPill.style.background = "rgba(21, 128, 61, 0.15)";
+          }
+        }
+      }
+
+      function initTabs() {
+        const btns = document.querySelectorAll('.tab-btn');
+        const panes = document.querySelectorAll('.tab-pane');
+        btns.forEach(b => {
+          b.onclick = () => {
+            btns.forEach(x => x.classList.remove('active'));
+            panes.forEach(p => p.classList.remove('active'));
+            b.classList.add('active');
+            const target = document.getElementById(b.dataset.tab);
+            if (target) target.classList.add('active');
+          };
+        });
+      }
+
+      function initDecisionsPanel() {
+        renderDecisions();
+        const allBtn = document.getElementById('btn-approve-all');
+        if (allBtn) {
+          allBtn.onclick = () => {
+            const c = store.approveAllCriticalDecisions();
+            if (c > 0) showToast(`${c} tindakan kritikal berjaya diluluskan.`, 'success');
+            else showToast("Tiada tindakan kritikal belum diluluskan.", 'info');
+          };
+        }
+      }
+
+      function renderDecisions() {
+        const container = document.getElementById('decisions-list-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const decs = store.state.decisions;
+        const pendingCount = decs.filter(d => d.status === 'pending').length;
+        const badge = document.getElementById('badge-decisions-count');
+        if (badge) badge.textContent = pendingCount;
+
+        decs.forEach(dec => {
+          if (dec.status === 'dismissed') return;
+          const isApp = dec.status === 'approved';
+          const card = document.createElement('div');
+          card.className = `decision-card severity-${dec.severity} ${isApp ? 'status-approved' : ''}`;
+
+          card.innerHTML = `
+            <div class="dec-header">
+              <div>
+                <span style="font-size:10px; color:var(--text-muted); font-weight:700;">${dec.id} &bull; ${dec.category}</span>
+                <h4 class="dec-title">${dec.title}</h4>
+              </div>
+              <span class="dec-badge ${isApp ? 'badge-approved' : `badge-${dec.severity}`}">${isApp ? 'DILULUSKAN' : dec.severity.toUpperCase()}</span>
+            </div>
+            <p class="dec-desc">${dec.description}</p>
+            <div class="dec-impact">⚡ Impak: ${dec.impact}</div>
+            <div class="dec-actions">
+              ${!isApp ? `
+                <button class="btn-action btn-approve" data-dec-approve="${dec.id}">✅ ${dec.suggestedAction}</button>
+                <button class="btn-action btn-map-view" data-dec-view="${dec.id}">🧭 Peta</button>
+                <button class="btn-action btn-dismiss" data-dec-dismiss="${dec.id}">Tolak</button>
+              ` : `
+                <span style="font-size:11px; color:#22c55e; font-weight:700;">✓ Tindakan Telah Diluluskan &amp; Dikuatkuasakan oleh Operator</span>
+              `}
+            </div>
+          `;
+
+          const appBtn = card.querySelector(`[data-dec-approve="${dec.id}"]`);
+          if (appBtn) {
+            appBtn.onclick = () => {
+              store.approveDecision(dec.id);
+              showToast(`Tindakan diluluskan: ${dec.title}`, 'success');
+            };
+          }
+          const viewBtn = card.querySelector(`[data-dec-view="${dec.id}"]`);
+          if (viewBtn) {
+            viewBtn.onclick = () => {
+              if (mapEngine) {
+                if (dec.actionType === 'reroute_guthrie') mapEngine.focusLocation(3.1755, 101.5020, 15);
+                else if (dec.actionType === 'activate_pps_denai') mapEngine.focusLocation(3.1620, 101.5150, 16);
+                else mapEngine.focusLocation(3.1835, 101.5080, 15);
+              }
+            };
+          }
+          const disBtn = card.querySelector(`[data-dec-dismiss="${dec.id}"]`);
+          if (disBtn) {
+            disBtn.onclick = () => {
+              store.dismissDecision(dec.id);
+              showToast(`Cadangan ${dec.id} ditolak.`, 'info');
+            };
+          }
+          container.appendChild(card);
+        });
+      }
+
+      function initRequestsPanel() {
+        renderRequests();
+        document.querySelectorAll('#request-filter-group .audit-filter-btn').forEach(b => {
+          b.onclick = () => {
+            document.querySelectorAll('#request-filter-group .audit-filter-btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            currentReqFilter = b.dataset.reqFilter;
+            renderRequests();
+          };
+        });
+
+        const autoBtn = document.getElementById('btn-auto-match-all');
+        if (autoBtn) {
+          autoBtn.onclick = () => {
+            const c = store.autoMatchAllRequests();
+            if (c > 0) showToast(`${c} permintaan berjaya dipadankan dengan sumber berhampiran!`, 'success');
+            else showToast("Tiada permintaan menunggu untuk dipadankan.", 'info');
+          };
+        }
+      }
+
+      function renderRequests() {
+        const container = document.getElementById('requests-list-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const list = store.state.requests.filter(r => {
+          if (currentReqFilter === 'all') return true;
+          if (currentReqFilter === 'pending') return r.status === 'pending';
+          if (currentReqFilter === 'matched') return r.status === 'matched';
+          if (currentReqFilter === 'dispatched') return r.status === 'dispatched' || r.status === 'resolved';
+          return true;
+        });
+
+        if (list.length === 0) {
+          container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">Tiada permintaan dalam kategori ini.</div>`;
+          return;
+        }
+
+        list.forEach(req => {
+          const card = document.createElement('div');
+          card.className = 'request-card';
+          const urgColor = req.urgency === 'critical' ? '#ef4444' : (req.urgency === 'high' ? '#b45309' : '#15803d');
+          const isPend = req.status === 'pending';
+          const isMat = req.status === 'matched';
+          let mClass = isPend ? 'match-pending' : (isMat ? 'match-assigned' : 'match-dispatched');
+          let mText = isPend ? '⚠️ Belum Dipadankan (Menunggu Aset)' : (isMat ? `✓ Dipadankan: ${req.matchedResource} (ETA: ${req.eta})` : `🚀 Dikerahkan: ${req.matchedResource}`);
+
+          card.innerHTML = `
+            <div class="req-header">
+              <span class="req-id">${req.id}</span>
+              <span class="req-urgency" style="background:${urgColor}22; color:${urgColor}; border:1px solid ${urgColor};">${req.urgency.toUpperCase()}</span>
+            </div>
+            <div>
+              <div class="req-requester">${req.requester}</div>
+              <div class="req-location">📍 ${req.location} &bull; ${req.timestamp}</div>
+            </div>
+            <div class="req-need">
+              <strong>Keperluan:</strong> ${req.need} <br>
+              <small style="color:var(--text-muted);">Diperlukan: <strong>${req.requiredResource}</strong></small>
+            </div>
+            <div class="req-match-box ${mClass}"><span>${mText}</span></div>
+            <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:4px;">
+              <button class="btn-action btn-map-view" data-req-locate="${req.id}" style="padding:4px 8px; font-size:10px;">📍 Lokasi</button>
+              ${isPend ? `<button class="btn-action btn-approve" data-req-match="${req.id}" style="padding:4px 8px; font-size:10px;">⚡ Padan Sumber Sekarang</button>` : ''}
+              ${isMat ? `<button class="btn-action btn-approve" data-req-dispatch="${req.id}" style="padding:4px 8px; font-size:10px; background:#15803d;">🚀 Kerahkan Aset</button>` : ''}
+            </div>
+          `;
+
+          const locBtn = card.querySelector(`[data-req-locate="${req.id}"]`);
+          if (locBtn) {
+            locBtn.onclick = () => {
+              if (mapEngine && req.coordinates) {
+                mapEngine.focusLocation(req.coordinates[0], req.coordinates[1], 16);
+                showToast(`Menumpukan peta ke lokasi pemohon ${req.id}`, 'info');
+              }
+            };
+          }
+          const matBtn = card.querySelector(`[data-req-match="${req.id}"]`);
+          if (matBtn) {
+            matBtn.onclick = () => {
+              store.matchRequest(req.id);
+              showToast(`Permintaan ${req.id} berjaya dipadankan!`, 'success');
+            };
+          }
+          const disBtn = card.querySelector(`[data-req-dispatch="${req.id}"]`);
+          if (disBtn) {
+            disBtn.onclick = () => {
+              store.dispatchRequest(req.id);
+              showToast(`Aset bagi ${req.id} telah dikerahkan!`, 'success');
+            };
+          }
+
+          container.appendChild(card);
+        });
+      }
+
+      function initVerificationPanel() {
+        renderAuditLogs();
+        document.querySelectorAll('#audit-filter-group .audit-filter-btn').forEach(b => {
+          b.onclick = () => {
+            document.querySelectorAll('#audit-filter-group .audit-filter-btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            currentLogFilter = b.dataset.logFilter;
+            renderAuditLogs();
+          };
+        });
+
+        const expBtn = document.getElementById('btn-export-audit');
+        if (expBtn) {
+          expBtn.onclick = () => {
+            const jsonStr = store.exportAuditLogJSON();
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `NADITOWN_Audit_Report_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Laporan verifikasi audit digital berjaya dimuat turun (JSON).", 'success');
+          };
+        }
+      }
+
+      function renderAuditLogs() {
+        const container = document.getElementById('audit-log-stream');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const vrf = store.state.verification;
+        const vrfMatch = document.getElementById('vrf-match-ratio');
+        const vrfApp = document.getElementById('vrf-approvals-count');
+        const vrfHash = document.getElementById('vrf-hash-val');
+        const bCount = document.getElementById('badge-logs-count');
+
+        if (vrfMatch) {
+          const tot = store.state.requests.length;
+          const mat = store.state.requests.filter(r => r.status !== 'pending').length;
+          const pct = tot > 0 ? Math.round((mat / tot) * 100) : 0;
+          vrfMatch.textContent = `${mat} / ${tot} Permintaan (${pct}%)`;
+        }
+        if (vrfApp) vrfApp.textContent = `${vrf.totalApprovalsCount} Diluluskan`;
+        if (vrfHash) vrfHash.textContent = vrf.systemAuditHash;
+        if (bCount) bCount.textContent = store.state.eventLogs.length;
+
+        const filtered = store.state.eventLogs.filter(l => currentLogFilter === 'ALL' || l.category === currentLogFilter);
+        filtered.forEach(log => {
+          const d = document.createElement('div');
+          d.className = 'audit-entry';
+          d.innerHTML = `
+            <div class="audit-entry-top">
+              <span class="audit-cat cat-${log.category || 'INFO'}">${log.category || 'EVENT'}</span>
+              <span class="audit-time">${log.timestamp}</span>
+            </div>
+            <div style="color:#ffffff; line-height:1.3;">${log.message}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+              <span style="font-size:9px; color:var(--text-muted);">Punca: ${log.author || 'Sistem'}</span>
+              <span class="audit-hash">${log.auditHash || 'VRF-HASH'}</span>
+            </div>
+          `;
+          container.appendChild(d);
+        });
+      }
+
+      function initModal() {
+        const modal = document.getElementById('modal-new-request');
+        const openBtn = document.getElementById('btn-new-request-modal');
+        const closeBtn = document.getElementById('modal-close-btn');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+        const submitBtn = document.getElementById('modal-submit-btn');
+
+        if (openBtn) openBtn.onclick = () => modal.style.display = 'flex';
+        if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
+        if (cancelBtn) cancelBtn.onclick = () => modal.style.display = 'none';
+
+        if (submitBtn) {
+          submitBtn.onclick = () => {
+            const name = document.getElementById('modal-inp-name')?.value.trim();
+            const loc = document.getElementById('modal-inp-location')?.value.trim();
+            const need = document.getElementById('modal-inp-need')?.value.trim();
+            const urg = document.getElementById('modal-inp-urgency')?.value;
+            const res = document.getElementById('modal-inp-resource')?.value;
+
+            if (!name || !loc || !need) {
+              alert("Sila lengkapkan maklumat mangsa.");
+              return;
+            }
+
+            store.addCitizenRequest({
+              requester: name,
+              location: loc,
+              need: need,
+              urgency: urg,
+              requiredResource: res,
+              coordinates: [3.1800, 101.5050]
+            });
+
+            document.getElementById('modal-inp-name').value = '';
+            document.getElementById('modal-inp-location').value = '';
+            document.getElementById('modal-inp-need').value = '';
+            modal.style.display = 'none';
+            showToast(`Permintaan ${name} didaftarkan!`, 'success');
+          };
+        }
+      }
+
+      function setupSubscriptions() {
+        store.subscribe('roads_updated', () => { updateRoadKPIs(); updateRoutingKPIs(); renderDecisions(); });
+        store.subscribe('facility_updated', () => updateShelterKPIs());
+        store.subscribe('resources_updated', () => updateShelterKPIs());
+        store.subscribe('request_updated', () => { updateRequestsKPIs(); renderRequests(); renderAuditLogs(); });
+        store.subscribe('request_added', () => { updateRequestsKPIs(); renderRequests(); renderAuditLogs(); });
+        store.subscribe('decision_updated', () => { renderDecisions(); renderAuditLogs(); });
+        store.subscribe('route_recalculated', () => updateRoutingKPIs());
+        store.subscribe('log_added', () => { renderAuditLogs(); updateRoutingKPIs(); });
+        store.subscribe('verification_updated', () => renderAuditLogs());
+      }
+
+      function showToast(msg, type = 'info') {
+        const c = document.getElementById('toast-container');
+        if (!c) return;
+        const t = document.createElement('div');
+        t.className = 'toast';
+        if (type === 'success') t.style.borderLeftColor = 'var(--green-bright)';
+        else if (type === 'warning') t.style.borderLeftColor = 'var(--brown-amber)';
+        else if (type === 'danger') t.style.borderLeftColor = 'var(--accent-red)';
+        else t.style.borderLeftColor = 'var(--green-primary)';
+        t.innerHTML = `<span>${msg}</span>`;
+        c.appendChild(t);
+        setTimeout(() => {
+          t.style.opacity = '0';
+          t.style.transform = 'translateX(50px)';
+          setTimeout(() => t.remove(), 400);
+        }, 3500);
+      }
+
+      // Bootstrap when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+      } else {
+        initApp();
+      }
+    })();
+  </script>
+
+</body>
+</html>
