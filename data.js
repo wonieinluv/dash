@@ -1,14 +1,15 @@
 /**
  * NADITOWN - Township Emergency Operating System
- * Dataset Sampel: Bandar Elmina (Sime Darby Property), Shah Alam
- * Menyokong keperluan Ahli 1 (Peta & UI), Ahli 2 (Dashboard), 
- * Ahli 3 (Simulasi), Ahli 4 (Routing), dan Ahli 5 (Data & Testing).
+ * Sample Dataset: Bandar Elmina (City of Elmina), Shah Alam
+ * Developer: Sime Darby Property
+ * Supports: Ahli 1 (Map & UI), Ahli 2 (Dashboard), 
+ * Ahli 3 (Simulation), Ahli 4 (Routing), and Ahli 5 (Data & Verification).
  */
 
 export const TOWNSHIP_META = {
   name: "Bandar Elmina (City of Elmina)",
   developer: "Sime Darby Property",
-  district: "Shah Alam, Selangor",
+  district: "Shah Alam, Selangor, Malaysia",
   coordinates: [3.1835, 101.5080],
   zoom: 14,
   bounds: [
@@ -17,145 +18,145 @@ export const TOWNSHIP_META = {
   ]
 };
 
-// 1. FASILITI KESIHATAN, PPS, LOGISTIK, & PUSAT KAWALAN
+// 1. HEALTHCARE, PPS EVACUATION SHELTERS, LOGISTICS & COMMAND CENTERS
 export const FACILITIES = [
   {
     id: "pps-01",
-    name: "Dewan Komuniti Elmina West",
+    name: "Elmina West Community Hall",
     type: "pps",
-    category: "Pusat Pemindahan Sementara (PPS)",
+    category: "Temporary Evacuation Center (PPS)",
     coordinates: [3.1855, 101.5042],
     capacity: 450,
     currentOccupants: 168,
     status: "active", // active | full | standby | closed
-    amenities: ["Bekalan Makanan", "Bilik Rawatan", "Genset Elektrik", "WiFi Satelit"],
-    contact: "019-3214589 (En. Rashid - JKM)",
-    lastUpdated: "10 minit lalu"
+    amenities: ["Food Rations", "First Aid Clinic", "Power Generator", "Satellite WiFi"],
+    contact: "+60 19-321 4589 (Mr. Rashid - Welfare Dept)",
+    lastUpdated: "10 mins ago"
   },
   {
     id: "pps-02",
-    name: "SK Subang Bestari (Dewan Utama)",
+    name: "SK Subang Bestari (Main Hall)",
     type: "pps",
-    category: "Pusat Pemindahan Sementara (PPS)",
+    category: "Temporary Evacuation Center (PPS)",
     coordinates: [3.1780, 101.5280],
     capacity: 600,
     currentOccupants: 480,
-    status: "warning", // hampir penuh
-    amenities: ["Dapur Rakyat", "Ruang Bersalin Kecemasan", "Sistem PA"],
-    contact: "012-9876543 (Pn. Salmah - Guru Besar)",
-    lastUpdated: "5 minit lalu"
+    status: "warning", // Near capacity
+    amenities: ["Community Kitchen", "Emergency Maternity Care", "PA Broadcast System"],
+    contact: "+60 12-987 6543 (Mrs. Salmah - Principal)",
+    lastUpdated: "5 mins ago"
   },
   {
     id: "pps-03",
-    name: "Kompleks Sukan Denai Alam",
+    name: "Denai Alam Sports Complex",
     type: "pps",
-    category: "Pusat Pemindahan Sementara (PPS)",
+    category: "Temporary Evacuation Center (PPS)",
     coordinates: [3.1620, 101.5150],
     capacity: 350,
     currentOccupants: 0,
     status: "standby",
-    amenities: ["Padang Helipad Sementara", "Tangki Air Bersih 50,000L"],
-    contact: "013-4455667 (Kapten Faris - RELA)",
-    lastUpdated: "15 minit lalu"
+    amenities: ["Emergency Helipad Field", "50,000L Potable Water Tank"],
+    contact: "+60 13-445 5667 (Capt. Faris - Civil Defense)",
+    lastUpdated: "15 mins ago"
   },
   {
     id: "med-01",
-    name: "Klinik Kesihatan Denai Alam & Pusat Triage",
+    name: "Denai Alam Health Clinic & Triage Base",
     type: "medical",
-    category: "Fasiliti Kesihatan",
+    category: "Healthcare & Triage Center",
     coordinates: [3.1660, 101.5185],
     capacity: 120,
     currentOccupants: 42,
     status: "active",
-    amenities: ["Ambulans 4x4", "Stok Antivenom & Tetanus", "Tabung Oksigen"],
-    contact: "03-78451122 (Dr. Azlan)",
-    lastUpdated: "2 minit lalu"
+    amenities: ["4x4 Ambulance Convoy", "Antivenom & Tetanus Stocks", "Oxygen Cylinders"],
+    contact: "+60 3-7845 1122 (Dr. Azlan)",
+    lastUpdated: "2 mins ago"
   },
   {
     id: "med-02",
-    name: "Hospital Thomson / Subang Medical Forward Base",
+    name: "Thomson Hospital / Subang Medical Forward Base",
     type: "medical",
-    category: "Fasiliti Kesihatan Rujukan",
+    category: "Referral Medical Center",
     coordinates: [3.1950, 101.5240],
     capacity: 80,
     currentOccupants: 15,
     status: "active",
-    amenities: ["Unit ICU Bergerak", "Bilik Bedah Kecemasan"],
-    contact: "03-61409999",
-    lastUpdated: "8 minit lalu"
+    amenities: ["Mobile Intensive Care Unit", "Emergency Operating Theater"],
+    contact: "+60 3-6140 9999 (Hotline)",
+    lastUpdated: "8 mins ago"
   },
   {
     id: "resp-01",
-    name: "Balai Bomba & Penyelamat (JBPM) Pos Elmina",
+    name: "Fire & Rescue Station (JBPM) Elmina Post",
     type: "responder",
-    category: "Pusat Tindak Balas Penyelamat",
+    category: "Emergency First Responder Base",
     coordinates: [3.1910, 101.5110],
     capacity: 50,
     currentOccupants: 38,
     status: "active",
-    amenities: ["3x Bot Penyelamat", "2x Lori 5-Tan", "Peralatan Penyelamatan Air"],
-    contact: "03-78469994 (PBK II Shahril)",
-    lastUpdated: "1 minit lalu"
+    amenities: ["3x Rescue Boats", "2x 5-Ton Trucks", "Swift Water Rescue Gear"],
+    contact: "+60 3-7846 9994 (Officer Shahril)",
+    lastUpdated: "1 min ago"
   },
   {
     id: "resp-02",
-    name: "Pusat Kawalan Operasi Bencana (PKOB) Sime Darby",
+    name: "Sime Darby Disaster Operation Command Center (PKOB)",
     type: "command",
-    category: "Pusat Kawalan Operasi",
+    category: "Disaster Operations Command",
     coordinates: [3.1830, 101.5030],
     capacity: 40,
     currentOccupants: 22,
     status: "active",
-    amenities: ["Drone Surveillance Command", "Radio Komunikasi Tetap", "CCTV Township AI"],
-    contact: "03-78498800 (Bilik Gerakan)",
-    lastUpdated: "Baru sahaja"
+    amenities: ["Drone Surveillance Command", "VHF/UHF Tactical Radio", "Township AI CCTV"],
+    contact: "+60 3-7849 8800 (Operations Desk)",
+    lastUpdated: "Just now"
   },
   {
     id: "log-01",
-    name: "Depot Logistik & Makanan Elmina East",
+    name: "Elmina East Disaster Relief & Logistics Depot",
     type: "logistics",
-    category: "Depot Bekalan Bencana",
+    category: "Disaster Relief Supply Depot",
     coordinates: [3.1795, 101.5150],
-    capacity: 5000, // pek bekalan
+    capacity: 5000,
     currentOccupants: 3400,
     status: "active",
-    amenities: ["Makanan Sedia Dimakan (MRE)", "Selimut & Khemah Kanvas", "Generator 25kVA"],
-    contact: "017-6655443 (Pegawai NADMA)",
-    lastUpdated: "12 minit lalu"
+    amenities: ["Ready-to-Eat Food Packs (MRE)", "Blankets & Canvas Tents", "25kVA Generators"],
+    contact: "+60 17-665 5443 (NADMA Logistics Officer)",
+    lastUpdated: "12 mins ago"
   }
 ];
 
-// 2. SENSOR IOT PARAS AIR & CUACA (TELEMETRI PINTAR)
+// 2. IOT WATER LEVEL & WEATHER TELEMETRY SENSORS
 export const SENSORS = [
   {
     id: "sensor-01",
-    name: "Sensor Kolam Takungan Elmina (Retention Pond West)",
+    name: "Elmina Retention Pond West Sensor",
     coordinates: [3.1838, 101.5092],
-    waterLevel: 2.85, // meter
+    waterLevel: 2.85, // meters
     dangerLevel: 3.20,
     warningLevel: 2.50,
     normalLevel: 1.50,
     trend: "rising", // rising | steady | falling
     status: "warning", // normal | warning | danger
     battery: "94%",
-    lastReading: "2 minit lalu"
+    lastReading: "2 mins ago"
   },
   {
     id: "sensor-02",
-    name: "Sensor Jambatan Sungai Buloh (Jalan Elmina 1)",
+    name: "Sungai Buloh Bridge Sensor (Jalan Elmina 1)",
     coordinates: [3.1755, 101.5020],
-    waterLevel: 3.42, // Melebihi aras bahaya
+    waterLevel: 3.42, // Breached danger level
     dangerLevel: 3.10,
     warningLevel: 2.40,
     normalLevel: 1.20,
     trend: "rising",
     status: "danger",
     battery: "88%",
-    lastReading: "1 minit lalu"
+    lastReading: "1 min ago"
   },
   {
     id: "sensor-03",
-    name: "Sensor Alur Air Elmina Rainbow Bridge",
+    name: "Elmina Rainbow Bridge Watercourse Sensor",
     coordinates: [3.1882, 101.5078],
     waterLevel: 1.95,
     dangerLevel: 2.80,
@@ -168,7 +169,7 @@ export const SENSORS = [
   },
   {
     id: "sensor-04",
-    name: "Sensor Parit Utama Denai Alam",
+    name: "Denai Alam Main Monsoon Drainage Sensor",
     coordinates: [3.1645, 101.5125],
     waterLevel: 2.65,
     dangerLevel: 2.70,
@@ -177,105 +178,105 @@ export const SENSORS = [
     trend: "rising",
     status: "warning",
     battery: "92%",
-    lastReading: "4 minit lalu"
+    lastReading: "4 mins ago"
   }
 ];
 
-// 3. SEGMEN JALAN RAYA & STATUS LALUAN
+// 3. ROAD SEGMENTS & PASSABILITY STATUS
 export const ROAD_SEGMENTS = [
   {
     id: "road-01",
-    name: "Persiaran Elmina (Sektor Barat)",
+    name: "Persiaran Elmina (West Sector Corridor)",
     status: "clear", // clear | closed | hazard
-    riskLevel: "Rendah",
+    riskLevel: "Low",
     coordinates: [
       [3.1810, 101.4980],
       [3.1835, 101.5030],
       [3.1855, 101.5080]
     ],
     surfaceWater: "0 cm",
-    passableFor: "Semua Kenderaan",
+    passableFor: "All Vehicles",
     floodThreshold: 35 // cm water depth trigger
   },
   {
     id: "road-02",
-    name: "Laluan Jambatan Sungai Buloh (Jalan Rentas Sektor 2)",
-    status: "closed", // DITUTUP KERANA BANJIR KILAT
-    riskLevel: "Bahaya",
+    name: "Sungai Buloh Bridge Crossway (Sector 2 Link)",
+    status: "closed", // CLOSED DUE TO FLASH FLOOD
+    riskLevel: "Danger",
     coordinates: [
       [3.1730, 101.4990],
       [3.1755, 101.5020],
       [3.1775, 101.5065]
     ],
-    surfaceWater: "65 cm (Arus Deras)",
-    passableFor: "Tidak Boleh Dilalui (Kecuali Bot Penyelamat)",
+    surfaceWater: "65 cm (Rapid Flow)",
+    passableFor: "Closed (Rescue Boats Only)",
     floodThreshold: 20
   },
   {
     id: "road-03",
-    name: "Jalan Denai Alam Timur (Hubung ke SK Subang)",
-    status: "hazard", // AMARAN: AIR BERTATANG
-    riskLevel: "Sederhana",
+    name: "Denai Alam East Road (SK Subang Bestari Link)",
+    status: "hazard", // WATER LOGGED
+    riskLevel: "Moderate",
     coordinates: [
       [3.1660, 101.5120],
       [3.1695, 101.5180],
       [3.1740, 101.5240]
     ],
     surfaceWater: "20 cm",
-    passableFor: "Kenderaan Berat & Lori 4x4 Sahaja",
+    passableFor: "Heavy Trucks & 4x4 Only",
     floodThreshold: 25
   },
   {
     id: "road-04",
-    name: "Koridor Guthrie Interchange - Elmina East Bypass",
+    name: "Guthrie Corridor Interchange - Elmina East Bypass",
     status: "clear",
-    riskLevel: "Rendah",
+    riskLevel: "Low",
     coordinates: [
       [3.1900, 101.5000],
       [3.1920, 101.5120],
       [3.1890, 101.5250]
     ],
     surfaceWater: "0 cm",
-    passableFor: "Semua Kenderaan (Laluan Evakuasi Utama)",
+    passableFor: "All Vehicles (Designated Evacuation Bypass)",
     floodThreshold: 60
   },
   {
     id: "road-05",
-    name: "Laluan Lingkaran Tasik Elmina Central Park",
+    name: "Elmina Central Park Lake Perimeter Ring",
     status: "hazard",
-    riskLevel: "Sederhana",
+    riskLevel: "Moderate",
     coordinates: [
       [3.1840, 101.5060],
       [3.1865, 101.5090],
       [3.1880, 101.5120]
     ],
     surfaceWater: "25 cm",
-    passableFor: "Kenderaan Penyelamat Sahaja",
+    passableFor: "First Responder Vehicles Only",
     floodThreshold: 25
   },
   {
     id: "road-06",
     name: "Persiaran Mokhtar Dahari Bypass Corridor",
     status: "clear",
-    riskLevel: "Rendah",
+    riskLevel: "Low",
     coordinates: [
       [3.1700, 101.4900],
       [3.1650, 101.5050],
       [3.1620, 101.5150]
     ],
     surfaceWater: "0 cm",
-    passableFor: "Semua Kenderaan",
+    passableFor: "All Vehicles",
     floodThreshold: 50
   }
 ];
 
-// 4. POLIGON ZON RISIKO BANJIR (ZON MERAH, JINGGA, KUNING)
+// 4. FLOOD HAZARD RISK POLYGONS (RED, ORANGE, YELLOW ZONES)
 export const FLOOD_ZONES = [
   {
     id: "zone-red",
-    name: "Zon Limpahan Sungai Buloh (Sektor Bawah)",
+    name: "Sungai Buloh Lowland Flood Basin",
     severity: "danger",
-    level: "Zon Merah (Evakuasi Segera)",
+    level: "Red Zone (Immediate Evacuation Required)",
     depth: "0.6m - 1.2m",
     color: "#ef4444",
     fillColor: "#dc2626",
@@ -290,11 +291,11 @@ export const FLOOD_ZONES = [
   },
   {
     id: "zone-orange",
-    name: "Kawasan Berisiko Limpahan Tasik Elmina",
+    name: "Elmina Central Park Lake Overflow Buffer",
     severity: "warning",
-    level: "Zon Jingga (Bersedia Berpindah)",
+    level: "Orange Zone (Standby for Evacuation)",
     depth: "0.2m - 0.5m",
-    color: "#f59e0b",
+    color: "#b45309",
     fillColor: "#d97706",
     fillOpacity: 0.28,
     polygon: [
@@ -306,11 +307,11 @@ export const FLOOD_ZONES = [
   },
   {
     id: "zone-yellow",
-    name: "Koridor Parit Monsun Denai Alam",
+    name: "Denai Alam Monsoon Drain Corridor",
     severity: "advisory",
-    level: "Zon Kuning (Pemantauan Berterusan)",
+    level: "Yellow Zone (Continuous Advisory & Monitoring)",
     depth: "0.1m - 0.3m",
-    color: "#eab308",
+    color: "#a16207",
     fillColor: "#ca8a04",
     fillOpacity: 0.22,
     polygon: [
@@ -322,7 +323,7 @@ export const FLOOD_ZONES = [
   }
 ];
 
-// 5. DATA SUMBER & LOGISTIK KESELURUHAN
+// 5. TOWNSHIP RESOURCE & LOGISTICS INVENTORY
 export const RESOURCES_SUMMARY = {
   totalPPSCapacity: 1400,
   currentPPSOccupancy: 648,
@@ -334,30 +335,30 @@ export const RESOURCES_SUMMARY = {
   emergencyGenerators: { total: 10, operational: 9, underMaintenance: 1 }
 };
 
-// 6. INVENTORI ASET BERSIAP-SIAGA UNTUK PADANAN PERMINTAAN (Ahli 5)
+// 6. STANDBY ASSETS FOR INCIDENT MATCHING
 export const AVAILABLE_RESOURCES = [
-  { id: "res-amb-01", name: "Ambulans 4x4 Triage Alpha", base: "Klinik Kesihatan Denai Alam", type: "medical", status: "ready" },
-  { id: "res-amb-02", name: "Ambulans Hospital Thomson Forward", base: "Hospital Thomson", type: "medical", status: "ready" },
-  { id: "res-boat-01", name: "Bot Penyelamat Bomba #1", base: "Balai Bomba Pos Elmina", type: "boat", status: "deployed" },
-  { id: "res-boat-02", name: "Bot Penyelamat Bomba #2", base: "Balai Bomba Pos Elmina", type: "boat", status: "ready" },
-  { id: "res-boat-03", name: "Bot Penyelamat RELA Delta", base: "Kompleks Sukan Denai Alam", type: "boat", status: "ready" },
-  { id: "res-truck-01", name: "Lori 5-Tan Pengangkut Bomba", base: "Balai Bomba Pos Elmina", type: "truck", status: "deployed" },
-  { id: "res-truck-02", name: "Lori Logistik Bantuan 5-Tan", base: "Depot Logistik Elmina East", type: "truck", status: "ready" },
-  { id: "res-4x4-01", name: "Pacuan 4x4 Peninjau PKOB", base: "PKOB Sime Darby", type: "4x4", status: "ready" },
-  { id: "res-4x4-02", name: "Pacuan 4x4 Sukarelawan NADMA", base: "Depot Logistik Elmina East", type: "4x4", status: "ready" },
-  { id: "res-gen-01", name: "Genset Mudah Alih 25kVA", base: "PKOB Sime Darby", type: "generator", status: "ready" }
+  { id: "res-amb-01", name: "4x4 Emergency Ambulance Alpha", base: "Denai Alam Health Clinic", type: "medical", status: "ready" },
+  { id: "res-amb-02", name: "Thomson Hospital Mobile Medic", base: "Thomson Hospital", type: "medical", status: "ready" },
+  { id: "res-boat-01", name: "JBPM Rapid Rescue Boat #1", base: "Fire & Rescue Station Elmina", type: "boat", status: "deployed" },
+  { id: "res-boat-02", name: "JBPM Rapid Rescue Boat #2", base: "Fire & Rescue Station Elmina", type: "boat", status: "ready" },
+  { id: "res-boat-03", name: "Civil Defense Boat Delta", base: "Denai Alam Sports Complex", type: "boat", status: "ready" },
+  { id: "res-truck-01", name: "JBPM 5-Ton High-Water Transporter", base: "Fire & Rescue Station Elmina", type: "truck", status: "deployed" },
+  { id: "res-truck-02", name: "NADMA 5-Ton Relief Supply Truck", base: "Elmina East Logistics Depot", type: "truck", status: "ready" },
+  { id: "res-4x4-01", name: "PKOB Recon 4x4 Vehicle", base: "PKOB Command Center", type: "4x4", status: "ready" },
+  { id: "res-4x4-02", name: "NADMA Volunteer 4x4 Truck", base: "Elmina East Logistics Depot", type: "4x4", status: "ready" },
+  { id: "res-gen-01", name: "Mobile 25kVA Power Generator", base: "PKOB Command Center", type: "generator", status: "ready" }
 ];
 
-// 7. PERMINTAAN MANGSA KECEMASAN / OUTSTANDING REQUESTS (Ahli 2 & 5)
+// 7. CITIZEN ASSISTANCE & EMERGENCY REQUESTS
 export const INITIAL_REQUESTS = [
   {
     id: "REQ-401",
-    requester: "Pn. Zaleha & Suami (Warga Emas)",
-    location: "No. 42, Jln Elmina Barat 4 (Sektor 4)",
+    requester: "Mdm. Zaleha & Husband (Senior Citizens)",
+    location: "No. 42, Jalan Elmina Barat 4 (Sector 4)",
     coordinates: [3.1812, 101.4995],
-    need: "Pemindahan Kerusi Roda & Rawatan Asma",
+    need: "Wheelchair Evacuation & Asthma Oxygen Support",
     urgency: "critical", // critical | high | medium
-    requiredResource: "Pacuan 4x4 / Ambulans",
+    requiredResource: "4x4 Ambulance / Medic",
     matchedResource: null,
     status: "pending", // pending | matched | dispatched | resolved
     timestamp: "10:02:14",
@@ -365,51 +366,51 @@ export const INITIAL_REQUESTS = [
   },
   {
     id: "REQ-402",
-    requester: "Komuniti Blok B (15 Keluarga)",
-    location: "Pangsapuri Elmina Green 2",
+    requester: "Block B Residents Committee (15 Families)",
+    location: "Elmina Green 2 Apartments",
     coordinates: [3.1870, 101.5030],
-    need: "150 Pek Makanan Kering & Air Minuman Bersih",
+    need: "150 MRE Food Packs & Clean Potable Water",
     urgency: "high",
-    requiredResource: "Lori Logistik 5-Tan",
-    matchedResource: "Depot Logistik Elmina East (Lori L-02)",
+    requiredResource: "5-Ton Logistics Truck",
+    matchedResource: "Elmina East Logistics Depot (Truck L-02)",
     status: "matched",
     timestamp: "09:55:30",
-    eta: "18 min"
+    eta: "18 mins"
   },
   {
     id: "REQ-403",
-    requester: "Keluarga En. Khairul (4 Mangsa Terperangkap)",
-    location: "Rumah Teres Sektor Bawah (Berhampiran Sg. Buloh)",
+    requester: "Khairul Family (4 Trapped Residents on Balcony)",
+    location: "Lowland Terrace House (Near Sungai Buloh Riverbank)",
     coordinates: [3.1740, 101.5015],
-    need: "Bot Penyelamat Air Deras (Paras Air 0.8m)",
+    need: "Rapid Water Rescue Boat (0.8m Depth Currents)",
     urgency: "critical",
-    requiredResource: "Bot Penyelamat JBPM",
-    matchedResource: "Balai Bomba Pos Elmina (Bot Penyelamat B-01)",
+    requiredResource: "Fire & Rescue Boat (JBPM)",
+    matchedResource: "Fire & Rescue Station Elmina (Boat B-01)",
     status: "dispatched",
     timestamp: "09:48:12",
-    eta: "6 min"
+    eta: "6 mins"
   },
   {
     id: "REQ-404",
-    requester: "Klinik Kesihatan Denai Alam (Pusat Triage)",
-    location: "Klinik Kesihatan Denai Alam",
+    requester: "Denai Alam Health Clinic (Triage Center)",
+    location: "Denai Alam Health Clinic",
     coordinates: [3.1660, 101.5185],
-    need: "Genset Sandaran Elektrik 25kVA & Tabung Oksigen",
+    need: "25kVA Backup Power Generator & Medical Oxygen Tank",
     urgency: "high",
-    requiredResource: "Generator 25kVA & Gas",
-    matchedResource: "PKOB Sime Darby (Genset Mobile #1)",
+    requiredResource: "25kVA Generator & Gas Supply",
+    matchedResource: "PKOB Command Center (Mobile Genset #1)",
     status: "matched",
     timestamp: "09:40:05",
-    eta: "12 min"
+    eta: "12 mins"
   },
   {
     id: "REQ-405",
-    requester: "Taska Permata Elmina (8 Kanak-kanak & 2 Guru)",
+    requester: "Permata Elmina Daycare (8 Children & 2 Teachers)",
     location: "Jalan Denai Alam Timur 3",
     coordinates: [3.1685, 101.5155],
-    need: "Lori Pemindahan Menghala Ke PPS SK Subang Bestari",
+    need: "High-Clearance Evacuation Truck to SK Subang PPS",
     urgency: "critical",
-    requiredResource: "Pacuan 4x4 / Lori Penyelamat",
+    requiredResource: "4x4 Evacuation Truck",
     matchedResource: null,
     status: "pending",
     timestamp: "10:08:40",
@@ -417,85 +418,84 @@ export const INITIAL_REQUESTS = [
   },
   {
     id: "REQ-406",
-    requester: "Dewan Komuniti Elmina West (PPS-01)",
-    location: "Dewan Komuniti Elmina West",
+    requester: "Elmina West Community Center (PPS-01)",
+    location: "Elmina West Community Hall",
     coordinates: [3.1855, 101.5042],
-    need: "60 Tilam Lipat & Kit Kebersihan Diri JKM",
+    need: "60 Foldable Mattresses & Welfare Hygiene Kits",
     urgency: "medium",
-    requiredResource: "Kit Kebersihan & Tilam PPS",
-    matchedResource: "Depot Logistik Elmina East",
+    requiredResource: "Shelter Mattresses & Hygiene Kits",
+    matchedResource: "Elmina East Logistics Depot",
     status: "dispatched",
     timestamp: "09:35:18",
-    eta: "8 min"
+    eta: "8 mins"
   }
 ];
 
-// 8. CADANGAN SOKONGAN KEPUTUSAN / DECISION SUPPORT (Ahli 2 & 4)
+// 8. TACTICAL DECISION SUPPORT RECOMMENDATIONS
 export const INITIAL_DECISIONS = [
   {
     id: "REC-101",
-    title: "Lencongan Konvoi Bantuan: Sektor 2 Terputus",
+    title: "Relief Convoy Reroute: Sector 2 Bridge Blocked",
     severity: "critical",
-    category: "Trafik & Logistik",
-    trigger: "Sensor 02 Melepasi Aras Bahaya (3.42m)",
-    description: "Laluan Jambatan Sungai Buloh terputus akibat arus deras. Alirkan semula konvoi bekalan dan ambulans melalui Koridor Guthrie Interchange Bypass (+1.4 km, pertambahan masa +4 minit).",
-    suggestedAction: "Luluskan Lencongan & Muat Naik Papan Tanda VMS",
+    category: "Traffic & Routing",
+    trigger: "Sensor 02 Breached Danger Level (3.42m)",
+    description: "Sungai Buloh bridge crossway submerged under rapid currents (+65cm). Divert all inbound medical ambulances and relief supply trucks via Guthrie Corridor Interchange Bypass (+1.4 km, estimated +4 mins).",
+    suggestedAction: "Authorize Reroute & Deploy Digital VMS Signboards",
     status: "pending", // pending | approved | dismissed
     actionType: "reroute_guthrie",
-    impact: "+4 min masa perjalanan | 100% selamat dari zon limpahan",
+    impact: "+4 mins travel time | 100% safe from flood inundation",
     timestamp: "09:32:00"
   },
   {
     id: "REC-102",
-    title: "Pencegahan Lebihan Kapasiti PPS SK Subang Bestari",
+    title: "Shelter Overflow Prevention: SK Subang Bestari",
     severity: "high",
-    category: "Pengurusan PPS",
-    trigger: "Kapasiti SK Subang mencapai 80% (480/600 orang)",
-    description: "Kapasiti SK Subang Bestari hampir penuh. Aktifkan Kompleks Sukan Denai Alam (350 tempat kosong) sebagai pusat penerimaan mangsa gelombang seterusnya dari Zon Denai Alam.",
-    suggestedAction: "Aktifkan Kompleks Sukan Denai Alam Sebagai PPS",
+    category: "Shelter Operations",
+    trigger: "SK Subang Bestari PPS Occupancy reached 80% (480/600 pax)",
+    description: "SK Subang Bestari PPS is nearing critical capacity. Activate Denai Alam Sports Complex (350 standby beds) as primary intake for upcoming Denai Alam flood evacuees.",
+    suggestedAction: "Activate Denai Alam Sports Complex as Active PPS",
     status: "pending",
     actionType: "activate_pps_denai",
-    impact: "Menambah 350 kapasiti katil | Mengelakkan kesesakan",
+    impact: "Adds 350 available beds | Prevents shelter overcrowding",
     timestamp: "09:41:15"
   },
   {
     id: "REC-103",
-    title: "Atur Gerak Pasukan Bot Penyelamat Tambahan",
+    title: "Deploy Additional Water Rescue Boats to Red Zone",
     severity: "critical",
-    category: "Penyelamatan & SAR",
-    trigger: "2 Permintaan Pemindahan Kritikal di Zon Banjir",
-    description: "Keluarkan 2x Bot Penyelamat daripada simpanan Balai Bomba Pos Elmina ke persimpangan Jalan Elmina 1 untuk operasi menyelamat mangsa terperangkap.",
-    suggestedAction: "Sahkan Arahan Mobilisasi Bot JBPM",
+    category: "Search & Rescue",
+    trigger: "2 Pending Critical Evacuation Calls in Lowland Basin",
+    description: "Mobilize 2x standby inflatable rescue boats from JBPM Fire Post to Jalan Elmina 1 intersection for priority citizen evacuation.",
+    suggestedAction: "Authorize JBPM Water Rescue Asset Deployment",
     status: "pending",
     actionType: "dispatch_boats",
-    impact: "Masa tindak balas SAR disingkatkan kepada < 8 minit",
+    impact: "Reduces Search & Rescue response time to < 8 mins",
     timestamp: "09:50:20"
   },
   {
     id: "REC-104",
-    title: "Buka Pintu Kawalan Alur Limpah Kolam Takungan",
+    title: "Activate Elmina Retention Pond Gravity Spillway",
     severity: "medium",
-    category: "Kawalan Hidrologi",
-    trigger: "Kolam Takungan Elmina West melepasi 2.85m",
-    description: "Buka pintu pelepasan kawalan graviti di Kolam Takungan Barat bagi mengelakkan air melimpahi Persiaran Elmina dalam tempoh 45 minit akan datang.",
-    suggestedAction: "Luluskan Pelepasan Berperingkat Kolam Takungan",
+    category: "Hydrology Control",
+    trigger: "Retention Pond West Water Level reached 2.85m",
+    description: "Open gravity controlled sluice gate at Retention Pond West to avert uncontrolled road overflow along Persiaran Elmina over the next 45 minutes.",
+    suggestedAction: "Authorize Phased Spillway Water Discharge",
     status: "approved",
     actionType: "open_spillway",
-    impact: "Mengurangkan tekanan air di Persiaran Elmina sebanyak 30%",
+    impact: "Relieves hydraulic head pressure along Persiaran Elmina by 30%",
     timestamp: "09:20:00"
   }
 ];
 
-// 9. LOG AKTIVITI & PERISTIWA (Untuk Ujian & Evaluasi Hackathon)
+// 9. VERIFIED EVENT & TELEMETRY AUDIT TRAIL
 export const INITIAL_EVENT_LOG = [
   {
     id: "evt-001",
     timestamp: "09:15:20",
     type: "warning",
     category: "TELEMETRY",
-    title: "Amaran Peningkatan Air",
-    message: "Sensor 02 (Jambatan Sungai Buloh) melepasi paras amaran 3.10m.",
-    author: "Sistem IoT Telemetri",
+    message: "Sensor 02 (Sungai Buloh Bridge) breached warning threshold at 3.10m.",
+    author: "IoT Telemetry System",
     auditHash: "VRF-9821A"
   },
   {
@@ -503,9 +503,8 @@ export const INITIAL_EVENT_LOG = [
     timestamp: "09:22:45",
     type: "danger",
     category: "ROAD_BLOCK",
-    title: "Penutupan Jalan Diaktifkan",
-    message: "Laluan Jambatan Sungai Buloh ditutup kepada semua kenderaan demi keselamatan.",
-    author: "Bilik Gerakan PKOB Sime Darby",
+    message: "Precautionary road closure activated on Sungai Buloh Bridge Crossway.",
+    author: "PKOB Command Desk",
     auditHash: "VRF-4412B"
   },
   {
@@ -513,9 +512,8 @@ export const INITIAL_EVENT_LOG = [
     timestamp: "09:28:10",
     type: "info",
     category: "PPS_UPDATE",
-    title: "Pembukaan PPS Dewan Komuniti Elmina",
-    message: "PPS dibuka secara rasmi. 168 orang penduduk Zon Merah berjaya dipindahkan.",
-    author: "Pegawai JKM Shah Alam",
+    message: "Elmina West Community Hall PPS activated. 168 Red Zone residents sheltered.",
+    author: "District Welfare Officer",
     auditHash: "VRF-7731C"
   },
   {
@@ -523,9 +521,8 @@ export const INITIAL_EVENT_LOG = [
     timestamp: "09:31:00",
     type: "success",
     category: "REROUTE",
-    title: "Laluan Alternatif Dikira Semula (8.4 ms)",
-    message: "Algoritma A* mengenalpasti Koridor Guthrie Bypass sebagai laluan selamat mengelak banjir.",
-    author: "NADITOWN Route Engine",
+    message: "Dijkstra/A* algorithm computed safe alternate route via Guthrie Bypass in 8.4 ms.",
+    author: "NADITOWN Routing Engine",
     auditHash: "VRF-1109D"
   }
 ];

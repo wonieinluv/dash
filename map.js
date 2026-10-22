@@ -1,13 +1,12 @@
 /**
- * NADITOWN - Peta Utama (Core Tactical Map Engine)
- * Dibina oleh Ahli 1: Salman
- * Komponen: Leaflet Map, Custom Tactical Markers,
+ * NADITOWN - Tactical Map Engine
+ * Developed for Sime Darby Property - Bandar Elmina Township
+ * Component: Interactive Leaflet Map, Tactical Markers,
  * Geo-Layers (Flood Zones, Roads, Facilities, IoT Sensors, Dijkstra Route).
  */
 
 import { store } from './store.js';
 
-// Pastikan keserasian dengan kedua-dua CDN global L dan ES modules
 const L = typeof window !== 'undefined' && window.L ? window.L : null;
 
 export class TownshipMap {
@@ -30,13 +29,13 @@ export class TownshipMap {
 
   init() {
     if (!L) {
-      console.error("Leaflet (L) tidak ditemui. Pastikan CDN Leaflet dimuatkan dalam HTML.");
+      console.error("Leaflet (L) not found. Please ensure Leaflet CDN is loaded.");
       return;
     }
 
     const meta = store.state.meta;
 
-    // 1. Inisialisasi Peta Leaflet
+    // 1. Initialize Leaflet Map
     this.map = L.map(this.containerId, {
       center: meta.coordinates,
       zoom: meta.zoom,
@@ -45,7 +44,7 @@ export class TownshipMap {
       zoomControl: false
     });
 
-    // 2. Definisi Base Tile Layers
+    // 2. Base Tile Layers
     this.baseLayers.dark = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
       attribution: '&copy; Esri, DeLorme, NAVTEQ',
       maxZoom: 16
@@ -62,15 +61,14 @@ export class TownshipMap {
       maxZoom: 18
     });
 
-    // Default tile layer adalah dark tactical
     this.baseLayers.dark.addTo(this.map);
 
-    // 3. Masukkan Layer Groups ke dalam peta
+    // 3. Add Layer Groups
     Object.values(this.layerGroups).forEach(group => {
       if (group) group.addTo(this.map);
     });
 
-    // 4. Muatkan data awal ke atas peta
+    // 4. Render Initial Layers
     this.renderTownshipBoundary();
     this.renderFloodZones();
     this.renderRoads();
@@ -78,17 +76,16 @@ export class TownshipMap {
     this.renderSensors();
     this.renderActiveRoute();
 
-    // 5. Sambungkan ke State Manager (Reactive Updates)
+    // 5. Connect State Listeners
     this.setupStateListeners();
 
-    // Scale bar
+    // Scale Bar
     L.control.scale({ imperial: false, position: 'bottomright' }).addTo(this.map);
 
-    console.log("NADITOWN: Peta Utama berjaya diinisialisasi untuk " + meta.name);
+    console.log("NADITOWN: Tactical Map initialized for " + meta.name);
   }
 
   setupStateListeners() {
-    // Toggling layer
     store.subscribe('layer_toggled', ({ layerKey, isVisible }) => {
       const group = this.layerGroups[layerKey];
       if (group) {
@@ -100,12 +97,10 @@ export class TownshipMap {
       }
     });
 
-    // Perubahan gaya peta
     store.subscribe('map_style_changed', (styleKey) => {
       this.switchBaseLayer(styleKey);
     });
 
-    // Kemaskini status jalan
     store.subscribe('road_status_changed', ({ roadId, newStatus }) => {
       this.updateRoadDisplay(roadId, newStatus);
     });
@@ -114,22 +109,18 @@ export class TownshipMap {
       this.renderRoads();
     });
 
-    // Kemaskini sensor dari simulasi
     store.subscribe('sensors_updated', () => {
       this.renderSensors();
     });
 
-    // Kemaskini zon banjir dari simulasi
     store.subscribe('simulation_updated', () => {
       this.renderFloodZones();
     });
 
-    // Kemaskini laluan Dijkstra
     store.subscribe('route_recalculated', (routingData) => {
       this.renderActiveRoute(routingData);
     });
 
-    // Penambahan fasiliti baharu
     store.subscribe('facility_added', (facility) => {
       this.addFacilityMarker(facility);
     });
@@ -149,7 +140,6 @@ export class TownshipMap {
     }
   }
 
-  // Sempadan Kawasan Bandar Elmina
   renderTownshipBoundary() {
     const boundaryCoords = [
       [3.1600, 101.4880],
@@ -160,19 +150,17 @@ export class TownshipMap {
     ];
 
     L.polygon(boundaryCoords, {
-      color: '#3b82f6',
+      color: '#15803d',
       weight: 2,
       dashArray: '6, 6',
-      fillColor: '#3b82f6',
+      fillColor: '#15803d',
       fillOpacity: 0.03,
       interactive: false
     }).addTo(this.map);
   }
 
-  // Poligon Zon Risiko Banjir
   renderFloodZones() {
     this.layerGroups.floodZones.clearLayers();
-
     const multiplier = store.state.simulation.riskMultiplier || 1.0;
 
     store.state.floodZones.forEach(zone => {
@@ -187,8 +175,8 @@ export class TownshipMap {
       polygon.bindTooltip(`
         <div style="font-family: inherit; font-size: 12px; color: #fff;">
           <strong style="color: ${zone.color};">${zone.name}</strong><br>
-          <span style="display:inline-block; margin-top:2px; padding: 2px 6px; border-radius: 4px; font-weight:600; font-size:10px; background: ${zone.color}33; color: ${zone.color};">${zone.level}</span><br>
-          <small style="color: #94a3b8;">Jangkaan Aras Air: ${zone.depth}</small>
+          <span style="display:inline-block; margin-top:2px; padding: 2px 6px; border-radius: 4px; font-weight:700; font-size:10px; background: ${zone.color}33; color: ${zone.color};">${zone.level}</span><br>
+          <small style="color: #d7bfa8;">Expected Water Depth: ${zone.depth}</small>
         </div>
       `, { sticky: true, className: 'leaflet-dark-tooltip' });
 
@@ -200,7 +188,6 @@ export class TownshipMap {
     });
   }
 
-  // Rangkaian Segmen Jalan Raya
   renderRoads() {
     this.layerGroups.roads.clearLayers();
     this.roadsMap.clear();
@@ -211,16 +198,16 @@ export class TownshipMap {
   }
 
   createRoadPolyline(road) {
-    let color = '#10b981'; // Hijau / Clear
+    let color = '#22c55e'; // Green / Clear
     let weight = 5;
     let dashArray = null;
 
     if (road.status === 'closed') {
-      color = '#ef4444'; // Merah / Terputus
+      color = '#ef4444'; // Red / Closed
       weight = 6;
       dashArray = '8, 8';
     } else if (road.status === 'hazard') {
-      color = '#f59e0b'; // Amber / Amaran
+      color = '#b45309'; // Amber / Hazard
       weight = 5;
       dashArray = '5, 6';
     }
@@ -236,10 +223,10 @@ export class TownshipMap {
     });
 
     const statusBadge = road.status === 'closed' 
-      ? '<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">🔴 JALAN DITUTUP</span>'
+      ? '<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">🔴 ROAD CLOSED</span>'
       : (road.status === 'hazard' 
-        ? '<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">⚠️ AIR BERTATANG</span>'
-        : '<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">🟢 LALUAN SELAMAT</span>');
+        ? '<span style="background: rgba(180, 83, 9, 0.2); color: #f59e0b; border: 1px solid #b45309; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">⚠️ WATER LOGGED</span>'
+        : '<span style="background: rgba(21, 128, 61, 0.2); color: #22c55e; border: 1px solid #15803d; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">🟢 ROAD CLEAR (OPEN)</span>');
 
     const popupHtml = `
       <div style="font-family: inherit; color: #f8fafc; min-width: 230px;">
@@ -247,22 +234,22 @@ export class TownshipMap {
           ${statusBadge}
           <h4 style="margin-top: 6px; font-size: 14px; font-weight: 700; color: #fff;">${road.name}</h4>
         </div>
-        <div style="background: #0f172a; padding: 8px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; border: 1px solid #334155;">
+        <div style="background: #19241b; padding: 8px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; border: 1px solid #2d4533;">
           <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
-            <span style="color: #94a3b8;">Aras Air:</span>
+            <span style="color: #9fb39c;">Water Depth:</span>
             <strong style="color: #fff;">${road.surfaceWater}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
-            <span style="color: #94a3b8;">Akses:</span>
+            <span style="color: #9fb39c;">Passable For:</span>
             <strong style="color: #fff; text-align:right;">${road.passableFor}</strong>
           </div>
           <div style="display:flex; justify-content:space-between;">
-            <span style="color: #94a3b8;">Tahap Risiko:</span>
-            <strong style="color: ${road.status === 'closed' ? '#ef4444' : (road.status === 'hazard' ? '#f59e0b' : '#10b981')};">${road.riskLevel}</strong>
+            <span style="color: #9fb39c;">Risk Level:</span>
+            <strong style="color: ${road.status === 'closed' ? '#ef4444' : (road.status === 'hazard' ? '#f59e0b' : '#22c55e')};">${road.riskLevel}</strong>
           </div>
         </div>
-        <button id="toggle-road-btn-${road.id}" style="width: 100%; padding: 6px 12px; border-radius: 4px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: ${road.status === 'closed' ? '#10b981' : '#ef4444'}; color: #fff;">
-          ${road.status === 'closed' ? 'Buka Semula Laluan' : 'Tutup Laluan (Simulasi)'}
+        <button id="toggle-road-btn-${road.id}" style="width: 100%; padding: 6px 12px; border-radius: 4px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; background: ${road.status === 'closed' ? '#15803d' : '#ef4444'}; color: #fff;">
+          ${road.status === 'closed' ? 'Reopen Road Segment' : 'Close Road Segment (Simulate Flood)'}
         </button>
       </div>
     `;
@@ -295,7 +282,6 @@ export class TownshipMap {
     this.createRoadPolyline(road);
   }
 
-  // Fasiliti (PPS, Hospital, Responders, Logistics)
   renderFacilities() {
     this.layerGroups.pps.clearLayers();
     this.layerGroups.medical.clearLayers();
@@ -325,38 +311,38 @@ export class TownshipMap {
 
     const marker = L.marker(fac.coordinates, { icon: customIcon });
 
-    const barColor = occupancyRate >= 90 ? '#ef4444' : (occupancyRate >= 70 ? '#f59e0b' : '#10b981');
+    const barColor = occupancyRate >= 90 ? '#ef4444' : (occupancyRate >= 70 ? '#b45309' : '#22c55e');
 
     const popupHtml = `
       <div style="font-family: inherit; color: #f8fafc; min-width: 250px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
+          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: rgba(21, 128, 61, 0.2); color: #86efac; border: 1px solid rgba(21, 128, 61, 0.3);">
             ${fac.category}
           </span>
-          <span style="font-size: 11px; color: ${fac.status === 'active' ? '#10b981' : (fac.status === 'warning' ? '#f59e0b' : '#94a3b8')}; font-weight: 600;">
+          <span style="font-size: 11px; color: ${fac.status === 'active' ? '#22c55e' : (fac.status === 'warning' ? '#f59e0b' : '#9fb39c')}; font-weight: 700;">
             ● ${fac.status.toUpperCase()}
           </span>
         </div>
         <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: #fff;">${fac.name}</h4>
         
-        <div style="background: #0f172a; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; border: 1px solid #334155;">
+        <div style="background: #19241b; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; border: 1px solid #2d4533;">
           <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
-            <span style="color: #94a3b8;">Kapasiti Dihuni:</span>
+            <span style="color: #9fb39c;">Shelter Occupancy:</span>
             <strong style="color: #fff;">${fac.currentOccupants} / ${fac.capacity} (${occupancyRate}%)</strong>
           </div>
-          <div style="height: 6px; width: 100%; background: #334155; border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+          <div style="height: 6px; width: 100%; background: #283e2f; border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
             <div style="width: ${Math.min(occupancyRate, 100)}%; height: 100%; background: ${barColor};"></div>
           </div>
           <div style="margin-bottom: 4px; color: #cbd5e1;">
-            <span style="color: #94a3b8;">Kemudahan:</span> ${fac.amenities.slice(0, 2).join(', ')}
+            <span style="color: #9fb39c;">Amenities:</span> ${fac.amenities.slice(0, 2).join(', ')}
           </div>
           <div style="color: #cbd5e1;">
-            <span style="color: #94a3b8;">Hubungi:</span> ${fac.contact}
+            <span style="color: #9fb39c;">Contact:</span> ${fac.contact}
           </div>
         </div>
 
-        <button id="set-dest-btn-${fac.id}" style="width: 100%; padding: 6px 12px; border-radius: 4px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: #2563eb; color: #fff;">
-          🧭 Set Destinasi Evakuasi Laluan
+        <button id="set-dest-btn-${fac.id}" style="width: 100%; padding: 6px 12px; border-radius: 4px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; background: #15803d; color: #fff;">
+          🧭 Set as Evacuation Destination
         </button>
       </div>
     `;
@@ -380,19 +366,18 @@ export class TownshipMap {
     this.markersMap.set(fac.id, marker);
   }
 
-  // Telemetri Sensor IoT Paras Air
   renderSensors() {
     this.layerGroups.sensors.clearLayers();
 
     store.state.sensors.forEach(sensor => {
       const isDanger = sensor.status === 'danger';
       const isWarning = sensor.status === 'warning';
-      const color = isDanger ? '#ef4444' : (isWarning ? '#f59e0b' : '#10b981');
+      const color = isDanger ? '#ef4444' : (isWarning ? '#b45309' : '#22c55e');
 
       const sensorHtml = `
         <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
           <div style="position: absolute; inset: 0; border-radius: 50%; border: 2px solid ${color}; opacity: 0.8; animation: pulseGlow 2s infinite ease-in-out;"></div>
-          <div style="background: #0f172a; border: 2px solid ${color}; border-radius: 50%; width: 34px; height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 10px ${color}88;">
+          <div style="background: #1b261e; border: 2px solid ${color}; border-radius: 50%; width: 34px; height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 10px ${color}88;">
             <span style="font-size: 10px; font-weight: 800; color: ${color}; line-height: 1;">${sensor.waterLevel}m</span>
           </div>
         </div>
@@ -414,27 +399,27 @@ export class TownshipMap {
             <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: ${color}22; color: ${color}; border: 1px solid ${color};">
               STATUS: ${sensor.status.toUpperCase()}
             </span>
-            <small style="color: #94a3b8;">Bateri ${sensor.battery}</small>
+            <small style="color: #d7bfa8;">Battery ${sensor.battery}</small>
           </div>
           <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #fff;">${sensor.name}</h4>
           
-          <div style="background: #0f172a; padding: 10px; border-radius: 6px; font-size: 12px; border: 1px solid #334155;">
+          <div style="background: #19241b; padding: 10px; border-radius: 6px; font-size: 12px; border: 1px solid #2d4533;">
             <div style="display:flex; justify-content:space-between; margin-bottom: 6px; align-items:baseline;">
-              <span style="color: #94a3b8;">Paras Air Semasa:</span>
-              <strong style="color: ${color}; font-size: 16px;">${sensor.waterLevel} Meter</strong>
+              <span style="color: #9fb39c;">Current Water Level:</span>
+              <strong style="color: ${color}; font-size: 16px;">${sensor.waterLevel} Meters</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
-              <span style="color: #94a3b8;">Ambang Bahaya:</span>
+              <span style="color: #9fb39c;">Danger Threshold:</span>
               <strong style="color: #ef4444;">${sensor.dangerLevel}m</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
-              <span style="color: #94a3b8;">Ambang Amaran:</span>
+              <span style="color: #9fb39c;">Warning Threshold:</span>
               <strong style="color: #f59e0b;">${sensor.warningLevel}m</strong>
             </div>
             <div style="display:flex; justify-content:space-between;">
-              <span style="color: #94a3b8;">Trend Telemetri:</span>
-              <strong style="color: ${sensor.trend === 'rising' ? '#ef4444' : '#10b981'};">
-                ${sensor.trend === 'rising' ? '⬆️ Meningkat' : '➡️ Stabil'}
+              <span style="color: #9fb39c;">Telemetry Trend:</span>
+              <strong style="color: ${sensor.trend === 'rising' ? '#ef4444' : '#22c55e'};">
+                ${sensor.trend === 'rising' ? '⬆️ Rising Rapidly' : '➡️ Steady'}
               </strong>
             </div>
           </div>
@@ -446,7 +431,6 @@ export class TownshipMap {
     });
   }
 
-  // Paparan Laluan Dijkstra / A* Terkini
   renderActiveRoute(routingData = null) {
     this.layerGroups.route.clearLayers();
 
@@ -455,8 +439,7 @@ export class TownshipMap {
 
     if (!points || points.length === 0) return;
 
-    // Garisan utama laluan beranimasi
-    const routePolyline = L.polyline(points, {
+    L.polyline(points, {
       color: '#10b981',
       weight: 6,
       opacity: 0.95,
@@ -466,37 +449,34 @@ export class TownshipMap {
       lineJoin: 'round'
     }).addTo(this.layerGroups.route);
 
-    // Mula dan Tamat markers
     const startPoint = points[0];
     const endPoint = points[points.length - 1];
 
-    // Marker Permulaan
     L.circleMarker(startPoint, {
       radius: 8,
-      fillColor: '#f59e0b',
+      fillColor: '#b45309',
       fillOpacity: 1,
       color: '#ffffff',
       weight: 2
-    }).bindTooltip('📍 Titik Mangsa / Pemula (Sektor 4)', { permanent: false, direction: 'top' })
+    }).bindTooltip('📍 Incident Location (Sector 4)', { permanent: false, direction: 'top' })
       .addTo(this.layerGroups.route);
 
-    // Marker Destinasi
     L.circleMarker(endPoint, {
       radius: 9,
-      fillColor: '#10b981',
+      fillColor: '#15803d',
       fillOpacity: 1,
       color: '#ffffff',
       weight: 2
-    }).bindTooltip('🏁 Destinasi PPS Selamat', { permanent: false, direction: 'top' })
+    }).bindTooltip('🏁 Safe Evacuation Shelter (PPS)', { permanent: false, direction: 'top' })
       .addTo(this.layerGroups.route);
   }
 
   getCustomIconHtml(fac, occupancyRate) {
-    let color = '#3b82f6';
+    let color = '#22c55e';
     let iconChar = '🏛️';
 
     if (fac.type === 'pps') {
-      color = '#3b82f6';
+      color = '#22c55e';
       iconChar = '🏠';
     } else if (fac.type === 'medical') {
       color = '#ef4444';
@@ -508,7 +488,7 @@ export class TownshipMap {
       color = '#8b5cf6';
       iconChar = '🛡️';
     } else if (fac.type === 'logistics') {
-      color = '#14b8a6';
+      color = '#a16207';
       iconChar = '📦';
     }
 
@@ -516,7 +496,7 @@ export class TownshipMap {
       <div style="position:relative; width:42px; height:42px; display:flex; align-items:center; justify-content:center;">
         <div style="position:absolute; inset:0; background: ${color}22; border: 2px solid ${color}; border-radius: 50%; box-shadow: 0 0 12px ${color}66;"></div>
         <div style="position:relative; font-size:18px;">${iconChar}</div>
-        ${fac.capacity > 0 ? `<div style="position:absolute; bottom:-4px; background:#0f172a; border: 1px solid ${color}; color:#fff; font-size:9px; font-weight:700; padding:1px 4px; border-radius:10px;">${occupancyRate}%</div>` : ''}
+        ${fac.capacity > 0 ? `<div style="position:absolute; bottom:-4px; background:#1b261e; border: 1px solid ${color}; color:#fff; font-size:9px; font-weight:700; padding:1px 4px; border-radius:10px;">${occupancyRate}%</div>` : ''}
       </div>
     `;
   }
